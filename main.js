@@ -15,14 +15,16 @@ var storedCWD = process.cwd();
 
 var plugin,platformId;
 
-(function(){   
-    // main program here 
+run();
+
+// main program here 
+function run() {
+    
     init();
     createTempProject();
     installPlugins();
     startServer();
-
-})();
+}
 
 function init() {
     var argv = parseArgs(process.argv.slice(2),{
@@ -53,7 +55,7 @@ function createTempProject() {
 
 function installPlugins() {
     console.log("local-medic :: installing plugins");
-
+    // still specific to ME
     shell.exec('cordova plugin add c:\\repos\\cordova\\cordova-plugin-device\\');
     shell.exec('cordova plugin add c:\\repos\\cordova\\cordova-plugin-device\\tests\\');
     shell.exec('cordova plugin add c:\\repos\\cordova\\cordova-plugin-test-framework\\');
