@@ -1,0 +1,17 @@
+TODO:
+
+- parse args for (a)platform (b)plugin
+- create a local server
+- create a localtunnel url to the local server
+- create a cordova project, and add the platorm (a)
+> cordova platform add
+- add the plugin (b)
+> cordova plugin add (b)
+> cordova plugin add org.apache.cordova.test-framework
+> cordova plugin add (b)/tests/
+
+- set config.xml start page to <content src="cdvtests/index.html" />
+- add localtunnel url to whitelist <access origin="..." />
+- put localtunnel url in www/medic.json file in cordova project
+- cordova run platform 
+- console.log results[] if failures : exit with error

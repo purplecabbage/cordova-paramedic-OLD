@@ -1,0 +1,24 @@
+{
+  "name": "local-medic",
+  "version": "0.0.1",
+  "description": "Use medic to test a cordova plugin locally",
+  "main": "main.js",
+  "bin": "./main.js",
+  "scripts": {
+    "test": "node main.js --platform windows@3.7.1 --plugin org.apache.cordova.device",
+    "start": "node main.js"
+  },
+  "keywords": [
+    "cordova",
+    "medic",
+    "test"
+  ],
+  "author": "Jesse MacFadyen",
+  "license": "Apache 2.0",
+  "dependencies": {
+    "cordova-lib": "~4.0.0",
+    "localtunnel": "~1.5.0",
+    "shelljs": "~0.3.0",
+    "minimist": "~1.1.0"
+  }
+}
