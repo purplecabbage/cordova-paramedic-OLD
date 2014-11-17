@@ -19,7 +19,6 @@ run();
 
 // main program here 
 function run() {
-    
     init();
     createTempProject();
     installPlugins();
@@ -64,12 +63,11 @@ function installPlugins() {
 function addAndRunPlatform() {
     console.log("local-medic :: adding platform and running");
     shell.exec('cordova -d platform add ' + platformId);
-    shell.exec('cordova -d run ' + platformId.split("@")[0] + " --device --phone");
+    shell.exec('cordova -d run ' + platformId.split("@")[0] + " --phone");
 }
 
 function cleanUpAndExitWithCode(exitCode) {
     shell.cd(storedCWD);
-    shell.rm('-rf', TEMP_PROJECT_PATH);
     process.exit(exitCode);
 }
 
@@ -110,7 +108,7 @@ function requestListener(request, response) {
     if (request.method == 'POST') {
         var body = '';
         request.on('data', function (data) {
-            console.log("data = " + data);
+            //console.log("data = " + data);
             body += data;
             // Too much POST data, kill the connection!
             if (body.length > 1e6) {
@@ -118,8 +116,8 @@ function requestListener(request, response) {
             }
         });
         request.on('end', function (res) {
-            if(body.indexOf("mobilespec" == 2)){ // {\"mobilespec\":{...}}
-                console.log("logging " + body);
+            if(body.indexOf("mobilespec")  == 2){ // {\"mobilespec\":{...}}
+                console.log("logging:" + body);
                 try {
                     var results = JSON.parse(body);
                 
@@ -137,11 +135,12 @@ function requestListener(request, response) {
                 }
             }
             else {
-                console.log(body);
+                console.log("console-log:" + body);
             }
         });
     }
     else {
+        console.log(request.method);
         response.writeHead(200, { 'Content-Type': 'text/plain'});
         response.write("Hello");
         response.end();
