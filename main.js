@@ -55,9 +55,12 @@ function createTempProject() {
 function installPlugins() {
     console.log("local-medic :: installing plugins");
     // still specific to ME
-    shell.exec('cordova plugin add c:\\repos\\cordova\\cordova-plugin-device\\');
-    shell.exec('cordova plugin add c:\\repos\\cordova\\cordova-plugin-device\\tests\\');
-    shell.exec('cordova plugin add c:\\repos\\cordova\\cordova-plugin-test-framework\\');
+    var pluginId = 'cordova-plugin-device';
+
+    shell.exec('git clone http://github.com/apache/' + pluginId);
+    shell.exec('cordova plugin add ' + pluginId);
+    shell.exec('cordova plugin add ' + path.join(pluginId,'tests'));
+    shell.exec('cordova plugin add http://github.com/apache/cordova-plugin-test-framework');
 }
 
 function addAndRunPlatform() {
