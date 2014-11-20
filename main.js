@@ -9,7 +9,7 @@ var http = require('http'),
 
 var tunneledUrl = "";
 var PORT = 8008;
-var USAGE = "Error missing args. \n Usage: $local-medic --platform CORDOVA-PLATFORM --plugin PLUGIN-PATH";
+var USAGE = "Error missing args. \n Usage: $cordova-paramedic --platform CORDOVA-PLATFORM --plugin PLUGIN-PATH";
 var TEMP_PROJECT_PATH = "tmp";
 var storedCWD = process.cwd();
 
@@ -47,13 +47,13 @@ function init() {
 }
 
 function createTempProject() {
-    console.log("local-medic :: creating temp project");
+    console.log("cordova-paramedic :: creating temp project");
     shell.exec('cordova create ' + TEMP_PROJECT_PATH);
     shell.cd(TEMP_PROJECT_PATH);
 }
 
 function installPlugins() {
-    console.log("local-medic :: installing plugins");
+    console.log("cordova-paramedic :: installing plugins");
     // still specific to ME
     var pluginId = 'cordova-plugin-device';
 
@@ -64,7 +64,7 @@ function installPlugins() {
 }
 
 function addAndRunPlatform() {
-    console.log("local-medic :: adding platform and running");
+    console.log("cordova-paramedic :: adding platform and running");
     shell.exec('cordova -d platform add ' + platformId);
     shell.exec('cordova -d run ' + platformId.split("@")[0] + " --phone");
 }
@@ -75,8 +75,7 @@ function cleanUpAndExitWithCode(exitCode) {
 }
 
 function writeMedicLogUrl(url) {
-    console.log("local-medic :: writing medic log url to project");
-
+    console.log("cordova-paramedic :: writing medic log url to project");
     var obj = {logurl:url};
     fs.writeFileSync(path.join("www","medic.json"),JSON.stringify(obj));
 }
@@ -84,7 +83,7 @@ function writeMedicLogUrl(url) {
 
 function setConfigStartPage() {
 
-    console.log("local-medic :: setting app start page to test page");
+    console.log("cordova-paramedic :: setting app start page to test page");
 
     var fileName = 'config.xml';
     var configStr = fs.readFileSync(fileName).toString();
@@ -99,7 +98,7 @@ function setConfigStartPage() {
 }
 
 function startServer() {
-    console.log("local-medic :: starting local medic server");
+    console.log("cordova-paramedic :: starting local medic server");
 
     var server = http.createServer(requestListener);
     server.listen(PORT, '127.0.0.1',function onServerConnect() {
@@ -159,9 +158,9 @@ function tunnelCallback(err, tunnel) {
         // the assigned public url for your tunnel
         // i.e. https://abcdefgjhij.localtunnel.me
         tunneledUrl = tunnel.url;
-        console.log("local-medic :: tunneledURL = " + tunneledUrl);
+        console.log("cordova-paramedic :: tunneledURL = " + tunneledUrl);
         writeMedicLogUrl(tunneledUrl);
-        addAndRunPlatform();
+        //addAndRunPlatform();
     }
 }
 
