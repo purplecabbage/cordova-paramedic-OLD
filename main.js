@@ -160,7 +160,7 @@ function tunnelCallback(err, tunnel) {
         tunneledUrl = tunnel.url;
         console.log("cordova-paramedic :: tunneledURL = " + tunneledUrl);
         writeMedicLogUrl(tunneledUrl);
-        //addAndRunPlatform();
+        addAndRunPlatform();
     }
 }
 
