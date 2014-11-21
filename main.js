@@ -53,13 +53,13 @@ function createTempProject() {
 }
 
 function installPlugins() {
-    console.log("cordova-paramedic :: installing plugins");
-    // still specific to ME
-    var pluginId = 'cordova-plugin-device';
+    console.log("cordova-paramedic :: installing " + plugin);
+    shell.exec('cordova plugin add ' + plugin);
 
-    shell.exec('git clone http://github.com/apache/' + pluginId);
-    shell.exec('cordova plugin add ' + pluginId);
-    shell.exec('cordova plugin add ' + path.join(pluginId,'tests'));
+    console.log("cordova-paramedic :: installing " + path.join(plugin,'tests'));
+    shell.exec('cordova plugin add ' + path.join(plugin,'tests'));
+
+    console.log("cordova-paramedic :: installing plugin-test-framework");
     shell.exec('cordova plugin add http://github.com/apache/cordova-plugin-test-framework');
 }
 
