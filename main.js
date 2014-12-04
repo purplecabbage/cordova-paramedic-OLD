@@ -107,7 +107,7 @@ function startServer() {
 }
 
 function requestListener(request, response) {
-    if (request.method == 'POST') {
+    if (request.method == 'PUT') {
         var body = '';
         request.on('data', function (data) {
             //console.log("data = " + data);
