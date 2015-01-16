@@ -7,3 +7,4 @@ install:
   - npm install cordova
   - npm install
   - npm test
+  
