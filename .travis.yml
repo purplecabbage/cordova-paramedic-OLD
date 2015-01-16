@@ -1,0 +1,9 @@
+language: node_js
+git:
+  depth: 10
+node_js:
+  - "0.10"
+install:
+  - npm install cordova
+  - npm install
+  - npm test
