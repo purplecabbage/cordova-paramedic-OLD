@@ -62,7 +62,7 @@ function installPlugins() {
     console.log("cordova-paramedic :: installing plugin-test-framework");
     shell.exec('cordova plugin add ../../cordova-plugin-test-framework/');
 
-    shell.exec('cordova plugin add ../../cordova-plugin-device/');
+    //shell.exec('cordova plugin add ../../cordova-plugin-device/');
 }
 
 function addAndRunPlatform() {
