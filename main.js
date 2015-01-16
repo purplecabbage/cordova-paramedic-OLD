@@ -28,7 +28,7 @@ function run() {
 function init() {
     var argv = parseArgs(process.argv.slice(2),{
         plugin:".",
-        platform:"windows"
+        platform:""
     });
 
     if(!argv.platform || !argv.plugin) {
@@ -60,13 +60,17 @@ function installPlugins() {
     shell.exec('cordova plugin add ' + path.join(plugin,'tests'));
 
     console.log("cordova-paramedic :: installing plugin-test-framework");
-    shell.exec('cordova plugin add http://github.com/apache/cordova-plugin-test-framework');
+    shell.exec('cordova plugin add ../../cordova-plugin-test-framework/');
+
+    shell.exec('cordova plugin add ../../cordova-plugin-device/');
 }
 
 function addAndRunPlatform() {
+    setConfigStartPage();
     console.log("cordova-paramedic :: adding platform and running");
-    shell.exec('cordova -d platform add ' + platformId);
-    shell.exec('cordova -d run ' + platformId.split("@")[0] + " --phone");
+    shell.exec('cordova platform add ' + platformId);
+    shell.exec('cordova prepare');
+    shell.exec('cordova emulate ' + platformId.split("@")[0] + " --phone");
 }
 
 function cleanUpAndExitWithCode(exitCode) {
@@ -93,24 +97,32 @@ function setConfigStartPage() {
     }
     else {
         console.error("Oops, could not find config.xml");
-
     }
 }
 
 function startServer() {
-    console.log("cordova-paramedic :: starting local medic server");
+    console.log("cordova-paramedic :: starting local medic server " + platformId);
 
     var server = http.createServer(requestListener);
     server.listen(PORT, '127.0.0.1',function onServerConnect() {
-        localtunnel(PORT, tunnelCallback);
+
+        if(platformId == "ios") {
+            console.log('platform is ios');
+            writeMedicLogUrl("http://127.0.0.1:" + PORT);
+            addAndRunPlatform();
+        }
+        else {
+            //localtunnel(PORT, tunnelCallback); // TODO
+            console.log("Only ios is currently supported");
+            cleanUpAndExitWithCode(1);
+        }
     });
 }
 
 function requestListener(request, response) {
-    if (request.method == 'PUT') {
+    if (request.method == 'PUT' || request.method == 'POST') {
         var body = '';
         request.on('data', function (data) {
-            //console.log("data = " + data);
             body += data;
             // Too much POST data, kill the connection!
             if (body.length > 1e6) {
@@ -119,16 +131,14 @@ function requestListener(request, response) {
         });
         request.on('end', function (res) {
             if(body.indexOf("mobilespec")  == 2){ // {\"mobilespec\":{...}}
-                console.log("logging:" + body);
                 try {
+                    console.log("body = " + body);
                     var results = JSON.parse(body);
-                
                     console.log("Results:: ran " + 
                         results.mobilespec.specs + 
                         " specs with " + 
                         results.mobilespec.failures + 
                         " failures");
-
                     cleanUpAndExitWithCode(0);
                 }
                 catch(err) {
@@ -144,7 +154,7 @@ function requestListener(request, response) {
     else {
         console.log(request.method);
         response.writeHead(200, { 'Content-Type': 'text/plain'});
-        response.write("Hello");
+        response.write("Hello"); // sanity check to make sure server is running
         response.end();
     }
 }
