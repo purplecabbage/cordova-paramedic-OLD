@@ -5,7 +5,7 @@
   "main": "main.js",
   "bin": "./main.js",
   "scripts": {
-    "test": "node main.js --platform windows --plugin org.apache.cordova.device",
+    "test": "node main.js --platform ios --plugin ../spec/testable-plugin/",
     "start": "node main.js"
   },
   "keywords": [
