@@ -6,6 +6,6 @@ install:
   - npm install -g ios-sim
   - npm install
   - cd ..
-  - git clone https:/github.com/apache/cordova-plugin-test-framework
+  - git clone https://github.com/apache/cordova-plugin-test-framework
 script:
   - npm test
