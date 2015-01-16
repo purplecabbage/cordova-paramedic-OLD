@@ -1,10 +1,8 @@
-language: node_js
-git:
-  depth: 10
+language: objective-c
 node_js:
   - "0.10"
 install:
   - npm install cordova
   - npm install
+script:
   - npm test
-  
