@@ -53,21 +53,20 @@ function createTempProject() {
 }
 
 function installPlugins() {
-    console.log("cordova-paramedic :: installing " + plugin);
+    //console.log("cordova-paramedic :: installing " + plugin);
     shell.exec('cordova plugin add ' + plugin);
 
-    console.log("cordova-paramedic :: installing " + path.join(plugin,'tests'));
+    //console.log("cordova-paramedic :: installing " + path.join(plugin,'tests'));
     shell.exec('cordova plugin add ' + path.join(plugin,'tests'));
 
-    console.log("cordova-paramedic :: installing plugin-test-framework");
+    //console.log("cordova-paramedic :: installing plugin-test-framework");
     shell.exec('cordova plugin add ../../cordova-plugin-test-framework/');
 
-    //shell.exec('cordova plugin add ../../cordova-plugin-device/');
 }
 
 function addAndRunPlatform() {
     setConfigStartPage();
-    console.log("cordova-paramedic :: adding platform and running");
+    //console.log("cordova-paramedic :: adding platform and running");
     shell.exec('cordova platform add ' + platformId);
     shell.exec('cordova prepare');
     shell.exec('cordova emulate ' + platformId.split("@")[0] + " --phone");
