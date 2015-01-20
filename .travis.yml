@@ -8,5 +8,6 @@ install:
   - cd ..
   - git clone https://github.com/apache/cordova-plugin-test-framework
   - cd cordova-paramedic
+  - npm install
 script:
   - npm test
