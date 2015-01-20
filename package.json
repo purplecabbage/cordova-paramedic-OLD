@@ -3,10 +3,15 @@
   "version": "0.0.1",
   "description": "Use medic to test a cordova plugin locally",
   "main": "main.js",
-  "bin": "./main.js",
+  "bin": {
+    "cordova-paramedic" : "./main.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/purplecabbage/cordova-paramedic.git"
+  },
   "scripts": {
-    "test": "node main.js --platform ios --plugin ../spec/testable-plugin/",
-    "start": "node main.js"
+    "test": "cordova-paramedic --platform ios --plugin ../spec/testable-plugin/"
   },
   "keywords": [
     "cordova",
