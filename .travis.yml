@@ -3,11 +3,10 @@ node_js:
   - "0.10"
 install:
   - npm install cordova
-  - npm install -g ios-sim
+  - npm install ios-sim
   - npm install
   - cd ..
   - git clone https://github.com/apache/cordova-plugin-test-framework
   - cd cordova-paramedic
-  - npm install
 script:
   - npm test
