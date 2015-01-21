@@ -8,3 +8,9 @@ Runs cordova medic/buildbot tests locally.
 To install :
 ``` $npm install cordova-paramedic ```
 
+Usage :
+
+```cordova-paramedic --platform CORDOVA-PLATFORM --plugin PLUGIN-PATH```
+CORDOVA-PLATFORM : the platform id, currently only supports 'ios'
+PLUGIN-PATH : the relative path to the plugin folder, expected to have a 'tests' folder
+
