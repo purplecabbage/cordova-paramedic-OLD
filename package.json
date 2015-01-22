@@ -1,8 +1,8 @@
 {
   "name": "cordova-paramedic",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Use medic to test a cordova plugin locally",
-  "main": "main.js",
+  "main": "cordova-paramedic",
   "bin": {
     "cordova-paramedic" : "./main.js"
   },
