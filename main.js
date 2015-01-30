@@ -48,6 +48,7 @@ function init() {
 
 function createTempProject() {
     console.log("cordova-paramedic :: creating temp project");
+    shell.exec('ls');
     shell.exec('cordova create ' + TEMP_PROJECT_PATH);
     shell.cd(TEMP_PROJECT_PATH);
 }
@@ -60,7 +61,7 @@ function installPlugins() {
     shell.exec('cordova plugin add ' + path.join(plugin,'tests'));
 
     //console.log("cordova-paramedic :: installing plugin-test-framework");
-    shell.exec('cordova plugin add ../../cordova-plugin-test-framework/');
+    shell.exec('cordova plugin add https://github.com/apache/cordova-plugin-test-framework');
 
 }
 
