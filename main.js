@@ -70,6 +70,11 @@ function addAndRunPlatform() {
     //console.log("cordova-paramedic :: adding platform and running");
     shell.exec('cordova platform add ' + platformId);
     shell.exec('cordova prepare');
+    // limit runtime to 5 minutes
+    setTimeout(function(){
+        console.log("This test seems to be block :: 5 minute timeout. Exiting ...");
+        cleanUpAndExitWithCode(1);
+    },(5 * 60 * 1000));
     shell.exec('cordova emulate ' + platformId.split("@")[0] + " --phone");
 }
 
@@ -102,7 +107,6 @@ function setConfigStartPage() {
 
 function startServer() {
     console.log("cordova-paramedic :: starting local medic server " + platformId);
-
     var server = http.createServer(requestListener);
     server.listen(PORT, '127.0.0.1',function onServerConnect() {
 
