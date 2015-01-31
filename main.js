@@ -55,13 +55,29 @@ function createTempProject() {
 
 function installPlugins() {
     //console.log("cordova-paramedic :: installing " + plugin);
-    shell.exec('cordova plugin add ' + plugin);
+
+    var installExitCode = shell.exec('cordova plugin add ' + plugin).code;
+    if(installExitCode != 0) {
+        console.error('Failed to install plugin : ' + plugin);
+        cleanUpAndExitWithCode(1);
+        return;
+    }
 
     //console.log("cordova-paramedic :: installing " + path.join(plugin,'tests'));
-    shell.exec('cordova plugin add ' + path.join(plugin,'tests'));
+    installExitCode = shell.exec('cordova plugin add ' + path.join(plugin,'tests')).code;
+    if(installExitCode != 0) {
+        console.error('Failed to find /tests/ for plugin : ' + plugin);
+        cleanUpAndExitWithCode(1);
+        return;
+    }
 
     //console.log("cordova-paramedic :: installing plugin-test-framework");
-    shell.exec('cordova plugin add https://github.com/apache/cordova-plugin-test-framework');
+    installExitCode = shell.exec('cordova plugin add https://github.com/apache/cordova-plugin-test-framework').code;
+    if(installExitCode != 0) {
+        console.error('cordova-plugin-test-framework');
+        cleanUpAndExitWithCode(1);
+        return;
+    }
 
 }
 
