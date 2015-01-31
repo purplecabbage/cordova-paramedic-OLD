@@ -143,7 +143,13 @@ function requestListener(request, response) {
                         " specs with " + 
                         results.mobilespec.failures + 
                         " failures");
-                    cleanUpAndExitWithCode(0);
+                    if(results.mobilespec.failures > 0) {
+                        cleanUpAndExitWithCode(1);
+                    }
+                    else {
+                        cleanUpAndExitWithCode(0);
+                    }
+                    
                 }
                 catch(err) {
                     console.log("parse error :: " + err);
