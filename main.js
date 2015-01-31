@@ -88,10 +88,20 @@ function addAndRunPlatform() {
     shell.exec('cordova prepare');
     // limit runtime to 5 minutes
     setTimeout(function(){
-        console.log("This test seems to be block :: 5 minute timeout. Exiting ...");
+        console.error("This test seems to be block :: 5 minute timeout. Exiting ...");
         cleanUpAndExitWithCode(1);
     },(5 * 60 * 1000));
-    shell.exec('cordova emulate ' + platformId.split("@")[0] + " --phone");
+
+    shell.exec('cordova emulate ' + platformId.split("@")[0] + " --phone",
+        {async:true},
+        function(code,output){
+            if(code != 0) {
+                console.error("Error: cordova emulate return error code " + code);
+                console.log("output: " + output);
+                cleanUpAndExitWithCode(1);
+            }
+        }
+    );
 }
 
 function cleanUpAndExitWithCode(exitCode) {
