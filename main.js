@@ -48,7 +48,6 @@ function init() {
 
 function createTempProject() {
     console.log("cordova-paramedic :: creating temp project");
-    shell.exec('ls');
     shell.exec('cordova create ' + TEMP_PROJECT_PATH);
     shell.cd(TEMP_PROJECT_PATH);
 }
@@ -138,6 +137,11 @@ function startServer() {
 
         if(platformId == "ios") {
             console.log('platform is ios');
+            writeMedicLogUrl("http://127.0.0.1:" + PORT);
+            addAndRunPlatform();
+        }
+        else if(platformId == "android") {
+            console.log('platform is android');
             writeMedicLogUrl("http://127.0.0.1:" + PORT);
             addAndRunPlatform();
         }
