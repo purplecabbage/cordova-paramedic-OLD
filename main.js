@@ -12,6 +12,7 @@ var PORT = 8008;
 var USAGE = "Error missing args. \n Usage: $cordova-paramedic --platform CORDOVA-PLATFORM --plugin PLUGIN-PATH";
 var TEMP_PROJECT_PATH = "tmp";
 var storedCWD = process.cwd();
+var TIMEOUT = 10 * 60 * 1000; // 10 minutes in msec - this will become a param
 
 var plugin,platformId;
 
@@ -89,7 +90,7 @@ function addAndRunPlatform() {
     setTimeout(function(){
         console.error("This test seems to be block :: 5 minute timeout. Exiting ...");
         cleanUpAndExitWithCode(1);
-    },(5 * 60 * 1000));
+    },(TIMEOUT));
 
     shell.exec('cordova emulate ' + platformId.split("@")[0] + " --phone",
         {async:true},

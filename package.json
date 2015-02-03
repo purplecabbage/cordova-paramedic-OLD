@@ -1,6 +1,6 @@
 {
   "name": "cordova-paramedic",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Use medic to test a cordova plugin locally",
   "main": "cordova-paramedic",
   "bin": {
