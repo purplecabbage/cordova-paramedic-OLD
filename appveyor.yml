@@ -2,7 +2,13 @@
 # http://www.appveyor.com/docs/appveyor-yml
 
 install:
+  - npm install cordova
+  - npm install ios-sim
   - npm install
+  - npm link
+  - cd ..
+  - git clone https://github.com/apache/cordova-plugin-test-framework
+  - cd cordova-paramedic
 
 build: off
 

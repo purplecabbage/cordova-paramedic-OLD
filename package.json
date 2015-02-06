@@ -16,7 +16,7 @@
     "test-travis":"npm run test-ios",
     "test-android":"cordova-paramedic --platform android --plugin ../spec/testable-plugin/",
     "test-ios": "cordova-paramedic --platform ios --plugin ../spec/testable-plugin/",
-    "test-wp8": "node ./main.js --platform wp8 --plugin ../spec/testable-plugin/"
+    "test-wp8": "node main.js --platform wp8 --plugin ../spec/testable-plugin/"
 
   },
   "keywords": [
