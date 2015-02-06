@@ -4,14 +4,14 @@
   "description": "Use medic to test a cordova plugin locally",
   "main": "cordova-paramedic",
   "bin": {
-    "cordova-paramedic" : "./main.js"
+    "cordova-paramedic": "./main.js"
   },
   "repository": {
     "type": "git",
     "url": "git://github.com/purplecabbage/cordova-paramedic.git"
   },
   "scripts": {
-    "test": "cordova-paramedic --platform ios --plugin ../spec/testable-plugin/"
+    "test": "cordova-paramedic --platform wp8 --plugin ../spec/testable-plugin/"
   },
   "keywords": [
     "cordova",
@@ -22,7 +22,8 @@
   "license": "Apache 2.0",
   "dependencies": {
     "localtunnel": "~1.5.0",
-    "shelljs": "~0.3.0",
-    "minimist": "~1.1.0"
+    "minimist": "~1.1.0",
+    "request": "^2.53.0",
+    "shelljs": "~0.3.0"
   }
 }

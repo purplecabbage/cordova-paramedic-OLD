@@ -1,10 +1,11 @@
 #!/usr/bin/env node
 
 var http = require('http'),
-    localtunnel = require('localtunnel'),
+    //localtunnel = require('localtunnel'),
     parseArgs = require('minimist'),
     shell = require('shelljs'),
     fs = require('fs'),
+    request = require('request'),
     path = require('path');
 
 var tunneledUrl = "";
@@ -88,7 +89,7 @@ function addAndRunPlatform() {
     shell.exec('cordova prepare');
     // limit runtime to 5 minutes
     setTimeout(function(){
-        console.error("This test seems to be block :: 5 minute timeout. Exiting ...");
+        console.error("This test seems to be blocked :: timeout exceeded. Exiting ...");
         cleanUpAndExitWithCode(1);
     },(TIMEOUT));
 
@@ -146,9 +147,24 @@ function startServer() {
             writeMedicLogUrl("http://127.0.0.1:" + PORT);
             addAndRunPlatform();
         }
+        else if(platformId == "wp8") {
+            request.get('http://google.com/', function(e, res, data) {
+                if(e) {
+                    console.error("failed to detect ip address");
+                    cleanUpAndExitWithCode(1);
+                }
+                else {
+                    console.log("res.req.connection = " + res.req.connection);
+                    var ip = res.req.connection.localAddress ||
+                             res.req.socket.localAddress;
+                    console.log("Using ip : " + ip);
+                    writeMedicLogUrl(ip + ":" + PORT);
+                }
+            });
+        }
         else {
             //localtunnel(PORT, tunnelCallback); // TODO
-            console.log("Only ios is currently supported");
+            console.log("platform is not supported :: " + platformId);
             cleanUpAndExitWithCode(1);
         }
     });
