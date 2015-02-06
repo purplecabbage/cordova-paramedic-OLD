@@ -3,7 +3,6 @@
 
 install:
   - npm install cordova
-  - npm install ios-sim
   - npm install
   - npm link
   - cd ..
