@@ -158,7 +158,7 @@ function startServer() {
                     var ip = res.req.connection.localAddress ||
                              res.req.socket.localAddress;
                     console.log("Using ip : " + ip);
-                    writeMedicLogUrl(ip + ":" + PORT);
+                    writeMedicLogUrl("http://" + ip + ":" + PORT);
                 }
             });
         }
