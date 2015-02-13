@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 var http = require('http'),
-    //localtunnel = require('localtunnel'),
+    localtunnel = require('localtunnel'),
     parseArgs = require('minimist'),
     shell = require('shelljs'),
     fs = require('fs'),
@@ -133,41 +133,41 @@ function setConfigStartPage() {
 }
 
 function startServer() {
+
     console.log("cordova-paramedic :: starting local medic server " + platformId);
     var server = http.createServer(requestListener);
     server.listen(PORT, '127.0.0.1',function onServerConnect() {
 
-        if(platformId == "ios") {
-            console.log('platform is ios');
-            writeMedicLogUrl("http://127.0.0.1:" + PORT);
-            addAndRunPlatform();
+        switch(platformId) {
+            case "ios"     :  // intentional fallthrough
+            case "android" :
+            case "windows" :
+                writeMedicLogUrl("http://127.0.0.1:" + PORT);
+                addAndRunPlatform();
+                break;
+            case "wp8" :
+                localtunnel(PORT, tunnelCallback);
+                // request.get('http://google.com/', function(e, res, data) {
+                //     if(e) {
+                //         console.error("failed to detect ip address");
+                //         cleanUpAndExitWithCode(1);
+                //     }
+                //     else {
+                //         console.log("res.req.connection = " + res.req.connection);
+                //         var ip = res.req.connection.localAddress ||
+                //                  res.req.socket.localAddress;
+                //         console.log("Using ip : " + ip);
+                //         writeMedicLogUrl("http://" + ip + ":" + PORT);
+                //         addAndRunPlatform();
+                //     }
+                // });
+                break;
+            default :
+                console.log("platform is not supported :: " + platformId);
+                cleanUpAndExitWithCode(1);
         }
-        else if(platformId == "android") {
-            console.log('platform is android');
-            writeMedicLogUrl("http://127.0.0.1:" + PORT);
-            addAndRunPlatform();
-        }
-        else if(platformId == "wp8") {
-            request.get('http://google.com/', function(e, res, data) {
-                if(e) {
-                    console.error("failed to detect ip address");
-                    cleanUpAndExitWithCode(1);
-                }
-                else {
-                    console.log("res.req.connection = " + res.req.connection);
-                    var ip = res.req.connection.localAddress ||
-                             res.req.socket.localAddress;
-                    console.log("Using ip : " + ip);
-                    writeMedicLogUrl("http://" + ip + ":" + PORT);
-                    addAndRunPlatform();
-                }
-            });
-        }
-        else {
-            //localtunnel(PORT, tunnelCallback); // TODO
-            console.log("platform is not supported :: " + platformId);
-            cleanUpAndExitWithCode(1);
-        }
+
+        //localtunnel(PORT, tunnelCallback); // TODO
     });
 }
 
