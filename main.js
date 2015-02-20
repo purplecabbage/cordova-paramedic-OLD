@@ -8,12 +8,14 @@ var http = require('http'),
     path = require('path');
 
 var PORT = 8008;
-var USAGE = "Error missing args. \n Usage: $cordova-paramedic --platform CORDOVA-PLATFORM --plugin PLUGIN-PATH";
+var USAGE = 'Error missing args.\n'
+USAGE += 'Usage: $cordova-paramedic --platform CORDOVA-PLATFORM --plugin PLUGIN-PATH\n';
+USAGE += 'Optionally can pass target build architecture as --architecture BUILD-ARCHITECTURE';
 var TEMP_PROJECT_PATH = "tmp";
 var storedCWD = process.cwd();
 var TIMEOUT = 10 * 60 * 1000; // 10 minutes in msec - this will become a param
 
-var plugin,platformId;
+var plugin,platformId,architecture;
 
 run();
 
@@ -28,7 +30,8 @@ function run() {
 function init() {
     var argv = parseArgs(process.argv.slice(2),{
         plugin:".",
-        platform:""
+        platform:"",
+        architecture:""
     });
 
     if(!argv.platform || !argv.plugin) {
@@ -38,6 +41,7 @@ function init() {
 
     platformId = argv.platform;
     plugin = argv.plugin;
+    architecture = argv.architecture;
 
     console.log('cordova-paramedic :: checking cordova version');
     var cordovaResult = shell.exec('cordova --version');
@@ -92,7 +96,13 @@ function addAndRunPlatform() {
         cleanUpAndExitWithCode(1);
     },(TIMEOUT));
 
-    shell.exec('cordova emulate ' + platformId.split("@")[0] + " --phone",
+    var emulateCommand = 'cordova emulate ' + platformId.split("@")[0];
+    if(architecture) {
+        emulateCommand += ' --archs=' + architecture;
+    }
+    emulateCommand += ' -- -phone';
+    console.log('cordova-paramedic :: trying to run using command: ' + emulateCommand);
+    shell.exec(emulateCommand,
         {async:true},
         function(code,output){
             if(code != 0) {
