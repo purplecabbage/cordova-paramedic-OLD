@@ -19,7 +19,7 @@ var plugin,platformId;
 
 run();
 
-// main program here 
+// main program here
 function run() {
     init();
     createTempProject();
@@ -186,10 +186,10 @@ function requestListener(request, response) {
                 try {
                     console.log("body = " + body);
                     var results = JSON.parse(body);
-                    console.log("Results:: ran " + 
-                        results.mobilespec.specs + 
-                        " specs with " + 
-                        results.mobilespec.failures + 
+                    console.log("Results:: ran " +
+                        results.mobilespec.specs +
+                        " specs with " +
+                        results.mobilespec.failures +
                         " failures");
                     if(results.mobilespec.failures > 0) {
                         cleanUpAndExitWithCode(1);
@@ -197,7 +197,7 @@ function requestListener(request, response) {
                     else {
                         cleanUpAndExitWithCode(0);
                     }
-                    
+
                 }
                 catch(err) {
                     console.log("parse error :: " + err);
@@ -231,4 +231,3 @@ function tunnelCallback(err, tunnel) {
         addAndRunPlatform();
     }
 }
-
