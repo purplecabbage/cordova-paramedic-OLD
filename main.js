@@ -39,7 +39,8 @@ function init() {
     platformId = argv.platform;
     plugin = argv.plugin;
 
-    var cordovaResult = shell.exec('cordova --version', {silent:true});
+    console.log('cordova-paramedic :: checking cordova version');
+    var cordovaResult = shell.exec('cordova --version');
     if(cordovaResult.code) {
         console.error(cordovaResult.output);
         process.exit(cordovaResult.code);
@@ -47,13 +48,13 @@ function init() {
 }
 
 function createTempProject() {
-    console.log("cordova-paramedic :: creating temp project");
+    console.log('cordova-paramedic :: creating temp project');
     shell.exec('cordova create ' + TEMP_PROJECT_PATH);
     shell.cd(TEMP_PROJECT_PATH);
 }
 
 function installPlugins() {
-    //console.log("cordova-paramedic :: installing " + plugin);
+    console.log('cordova-paramedic :: installing ' + plugin);
 
     var installExitCode = shell.exec('cordova plugin add ' + plugin).code;
     if(installExitCode != 0) {
@@ -62,7 +63,7 @@ function installPlugins() {
         return;
     }
 
-    //console.log("cordova-paramedic :: installing " + path.join(plugin,'tests'));
+    console.log('cordova-paramedic :: installing ' + path.join(plugin,'tests'));
     installExitCode = shell.exec('cordova plugin add ' + path.join(plugin,'tests')).code;
     if(installExitCode != 0) {
         console.error('Failed to find /tests/ for plugin : ' + plugin);
@@ -70,7 +71,7 @@ function installPlugins() {
         return;
     }
 
-    //console.log("cordova-paramedic :: installing plugin-test-framework");
+    console.log('cordova-paramedic :: installing plugin-test-framework');
     installExitCode = shell.exec('cordova plugin add https://github.com/apache/cordova-plugin-test-framework').code;
     if(installExitCode != 0) {
         console.error('cordova-plugin-test-framework');
