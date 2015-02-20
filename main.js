@@ -1,14 +1,12 @@
 #!/usr/bin/env node
 
 var http = require('http'),
-    localtunnel = require('localtunnel'),
     parseArgs = require('minimist'),
     shell = require('shelljs'),
     fs = require('fs'),
     request = require('request'),
     path = require('path');
 
-var tunneledUrl = "";
 var PORT = 8008;
 var USAGE = "Error missing args. \n Usage: $cordova-paramedic --platform CORDOVA-PLATFORM --plugin PLUGIN-PATH";
 var TEMP_PROJECT_PATH = "tmp";
@@ -134,40 +132,24 @@ function setConfigStartPage() {
 
 function startServer() {
 
-    console.log("cordova-paramedic :: starting local medic server " + platformId);
-    var server = http.createServer(requestListener);
-    server.listen(PORT, '127.0.0.1',function onServerConnect() {
+    console.log('cordova-paramedic :: starting local medic server for platform ' + platformId);
 
-        switch(platformId) {
-            case "ios"     :  // intentional fallthrough
-            case "android" :
-            case "windows" :
-                writeMedicLogUrl("http://127.0.0.1:" + PORT);
-                addAndRunPlatform();
-                break;
-            case "wp8" :
-                localtunnel(PORT, tunnelCallback);
-                // request.get('http://google.com/', function(e, res, data) {
-                //     if(e) {
-                //         console.error("failed to detect ip address");
-                //         cleanUpAndExitWithCode(1);
-                //     }
-                //     else {
-                //         console.log("res.req.connection = " + res.req.connection);
-                //         var ip = res.req.connection.localAddress ||
-                //                  res.req.socket.localAddress;
-                //         console.log("Using ip : " + ip);
-                //         writeMedicLogUrl("http://" + ip + ":" + PORT);
-                //         addAndRunPlatform();
-                //     }
-                // });
-                break;
-            default :
-                console.log("platform is not supported :: " + platformId);
-                cleanUpAndExitWithCode(1);
+    request.get('http://google.com/', function(e, res, data) {
+        if(e) {
+            console.error('Failed to detect ip address');
+            cleanUpAndExitWithCode(1);
         }
-
-        //localtunnel(PORT, tunnelCallback); // TODO
+        else {
+            var ip = res.req.connection.localAddress ||
+                     res.req.socket.localAddress ||
+                     '127.0.0.1';
+            console.log('Detected ip address: ' + ip);
+            var server = http.createServer(requestListener);
+            server.listen(PORT, ip, function onServerConnect() {
+                writeMedicLogUrl('http://' + ip + ':' + PORT);
+                addAndRunPlatform();
+            });
+        }
     });
 }
 
@@ -214,20 +196,5 @@ function requestListener(request, response) {
         response.writeHead(200, { 'Content-Type': 'text/plain'});
         response.write("Hello"); // sanity check to make sure server is running
         response.end();
-    }
-}
-
-function tunnelCallback(err, tunnel) {
-    if (err){
-        console.log("failed to create tunnel url, check your internet connectivity.")
-        cleanUpAndExitWithCode(1);
-    }
-    else {
-        // the assigned public url for your tunnel
-        // i.e. https://abcdefgjhij.localtunnel.me
-        tunneledUrl = tunnel.url;
-        console.log("cordova-paramedic :: tunneledURL = " + tunneledUrl);
-        writeMedicLogUrl(tunneledUrl);
-        addAndRunPlatform();
     }
 }
