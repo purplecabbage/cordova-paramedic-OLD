@@ -100,7 +100,6 @@ function addAndRunPlatform() {
     if(architecture) {
         emulateCommand += ' --archs=' + architecture;
     }
-    emulateCommand += ' -- -phone';
     console.log('cordova-paramedic :: trying to run using command: ' + emulateCommand);
     shell.exec(emulateCommand,
         {async:true},
