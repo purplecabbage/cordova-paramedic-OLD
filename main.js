@@ -109,9 +109,6 @@ function addAndRunPlatform() {
               console.log("output: " + output);
               cleanUpAndExitWithCode(1);
           }
-
-          shell.sed('-i', 'Invoke-Expression ("& `"$Path`"")', 'Invoke-Expression ("& `"$Path`" -force")', './platforms/windows/cordova/lib/WindowsStoreAppUtils.ps1');
-
           var runCommand = 'cordova run ' + platformId.split("@")[0];
           if(architecture) {
             runCommand += ' --archs=' + architecture;
