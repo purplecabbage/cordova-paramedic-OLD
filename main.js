@@ -96,19 +96,37 @@ function addAndRunPlatform() {
         cleanUpAndExitWithCode(1);
     },(TIMEOUT));
 
-    var emulateCommand = 'cordova emulate ' + platformId.split("@")[0];
+    var buildCommand = 'cordova build ' + platformId.split("@")[0];
     if(architecture) {
-        emulateCommand += ' --archs=' + architecture;
+      buildCommand += ' --archs=' + architecture;
     }
-    console.log('cordova-paramedic :: trying to run using command: ' + emulateCommand);
-    shell.exec(emulateCommand,
+    console.log('cordova-paramedic :: trying to build using command: ' + buildCommand);
+    shell.exec(buildCommand,
         {async:true},
         function(code,output){
-            if(code != 0) {
-                console.error("Error: cordova emulate return error code " + code);
-                console.log("output: " + output);
-                cleanUpAndExitWithCode(1);
-            }
+          if(code != 0) {
+              console.error("Error: cordova build return error code " + code);
+              console.log("output: " + output);
+              cleanUpAndExitWithCode(1);
+          }
+
+          shell.sed('-i', 'Invoke-Expression ("& `"$Path`"")', 'Invoke-Expression ("& `"$Path`" -force")', './platforms/windows/cordova/lib/WindowsStoreAppUtils.ps1');
+
+          var runCommand = 'cordova run ' + platformId.split("@")[0];
+          if(architecture) {
+            runCommand += ' --archs=' + architecture;
+          }
+          console.log('cordova-paramedic :: trying to run using command: ' + runCommand);
+          shell.exec(runCommand,
+              {async:true},
+              function(code,output){
+                  if(code != 0) {
+                      console.error("Error: cordova run return error code " + code);
+                      console.log("output: " + output);
+                      cleanUpAndExitWithCode(1);
+                  }
+              }
+          );
         }
     );
 }
