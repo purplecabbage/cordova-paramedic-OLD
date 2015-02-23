@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 var http = require('http'),
-    parseArgs = require('minimist'),
+    nconf = require('nconf');
     shell = require('shelljs'),
     fs = require('fs'),
     request = require('request'),
@@ -10,7 +10,7 @@ var http = require('http'),
 var PORT = 8008;
 var USAGE = 'Error missing args.\n'
 USAGE += 'Usage: $cordova-paramedic --platform CORDOVA-PLATFORM --plugin PLUGIN-PATH\n';
-USAGE += 'Optionally can pass target build architecture as --architecture BUILD-ARCHITECTURE';
+USAGE += 'Optional configurations can be set with: --config path/to/config.json';
 var TEMP_PROJECT_PATH = "tmp";
 var storedCWD = process.cwd();
 var TIMEOUT = 10 * 60 * 1000; // 10 minutes in msec - this will become a param
@@ -28,20 +28,22 @@ function run() {
 }
 
 function init() {
-    var argv = parseArgs(process.argv.slice(2),{
-        plugin:".",
-        platform:"",
-        architecture:""
-    });
+    nconf.argv();
 
-    if(!argv.platform || !argv.plugin) {
+    if(!nconf.get('platform') || !nconf.get('plugin')) {
         console.log(USAGE);
         process.exit(1);
     }
 
-    platformId = argv.platform;
-    plugin = argv.plugin;
-    architecture = argv.architecture;
+    platformId = nconf.get('platform');
+    plugin = nconf.get('plugin');
+    config = nconf.get('config');
+
+    if (config) {
+        nconf.file({ file: config });
+    }
+
+    architecture = nconf.get('architecture');
 
     console.log('cordova-paramedic :: checking cordova version');
     var cordovaResult = shell.exec('cordova --version');
