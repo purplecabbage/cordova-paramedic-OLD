@@ -14,7 +14,7 @@ USAGE += 'Optional configurations can be set with: --config path/to/config.json'
 var storedCWD = process.cwd();
 var TIMEOUT = 10 * 60 * 1000; // 10 minutes in msec - this will become a param
 
-var plugin,platformId,tempProjectPath,architecture;
+var plugin,platformId,tempProjectPath;
 
 run();
 
@@ -42,8 +42,6 @@ function init() {
     if (config) {
         nconf.file({ file: config });
     }
-
-    architecture = nconf.get('architecture');
 
     console.log('cordova-paramedic :: checking cordova version');
     var cordovaResult = shell.exec('cordova --version');
@@ -98,10 +96,18 @@ function addAndRunPlatform() {
         cleanUpAndExitWithCode(1);
     },(TIMEOUT));
 
-    var buildCommand = 'cordova build ' + platformId.split("@")[0];
-    if(architecture) {
-      buildCommand += ' --archs=' + architecture;
+    var cordovaOptions = platformId.split("@")[0];
+    if(nconf.get('architecture')) {
+        cordovaOptions += ' --archs=' + nconf.get('architecture');
     }
+    if(nconf.get('device')) {
+        cordovaOptions += ' --device';
+    }
+    if(nconf.get('phone')) {
+        cordovaOptions += ' -- --phone';
+    }
+
+    var buildCommand = 'cordova build ' + cordovaOptions;
     console.log('cordova-paramedic :: trying to build using command: ' + buildCommand);
     shell.exec(buildCommand,
         {async:true},
@@ -116,10 +122,7 @@ function addAndRunPlatform() {
           if (nconf.get('buildOnly')) {
             cleanUpAndExitWithCode(0);
           }
-          var runCommand = 'cordova run ' + platformId.split('@')[0] + ' --no-build';
-          if(architecture) {
-            runCommand += ' --archs=' + architecture;
-          }
+          var runCommand = 'cordova run --no-build ' + cordovaOptions;
           console.log('cordova-paramedic :: trying to run using command: ' + runCommand);
           shell.exec(runCommand,
               {async:true},
