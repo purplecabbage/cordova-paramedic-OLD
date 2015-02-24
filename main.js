@@ -111,7 +111,12 @@ function addAndRunPlatform() {
               console.log("output: " + output);
               cleanUpAndExitWithCode(1);
           }
-          var runCommand = 'cordova run ' + platformId.split("@")[0];
+          // If buildOnly configuration was set to true, don't try to run
+          // but exist with success code since build was successful
+          if (nconf.get('buildOnly')) {
+            cleanUpAndExitWithCode(0);
+          }
+          var runCommand = 'cordova run ' + platformId.split('@')[0] + ' --no-build';
           if(architecture) {
             runCommand += ' --archs=' + architecture;
           }
