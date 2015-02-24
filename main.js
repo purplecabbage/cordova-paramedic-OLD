@@ -11,11 +11,10 @@ var PORT = 8008;
 var USAGE = 'Error missing args.\n'
 USAGE += 'Usage: $cordova-paramedic --platform CORDOVA-PLATFORM --plugin PLUGIN-PATH\n';
 USAGE += 'Optional configurations can be set with: --config path/to/config.json';
-var TEMP_PROJECT_PATH = "tmp";
 var storedCWD = process.cwd();
 var TIMEOUT = 10 * 60 * 1000; // 10 minutes in msec - this will become a param
 
-var plugin,platformId,architecture;
+var plugin,platformId,tempProjectPath,architecture;
 
 run();
 
@@ -38,6 +37,7 @@ function init() {
     platformId = nconf.get('platform');
     plugin = nconf.get('plugin');
     config = nconf.get('config');
+    tempProjectPath = nconf.get('tempProjectPath') || 'tmp';
 
     if (config) {
         nconf.file({ file: config });
@@ -55,8 +55,8 @@ function init() {
 
 function createTempProject() {
     console.log('cordova-paramedic :: creating temp project');
-    shell.exec('cordova create ' + TEMP_PROJECT_PATH);
-    shell.cd(TEMP_PROJECT_PATH);
+    shell.exec('cordova create ' + tempProjectPath);
+    shell.cd(tempProjectPath);
 }
 
 function installPlugins() {
