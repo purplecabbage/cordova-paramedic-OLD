@@ -140,6 +140,9 @@ function addAndRunPlatform() {
 
 function cleanUpAndExitWithCode(exitCode) {
     shell.cd(storedCWD);
+    if(nconf.get('removeTempProject')) {
+      shell.rm('-rf', tempProjectPath);
+    }
     process.exit(exitCode);
 }
 
