@@ -1,25 +1,24 @@
 #!/usr/bin/env node
 
 var http = require('http'),
-    localtunnel = require('localtunnel'),
-    parseArgs = require('minimist'),
+    nconf = require('nconf');
     shell = require('shelljs'),
     fs = require('fs'),
     request = require('request'),
     path = require('path');
 
-var tunneledUrl = "";
 var PORT = 8008;
-var USAGE = "Error missing args. \n Usage: $cordova-paramedic --platform CORDOVA-PLATFORM --plugin PLUGIN-PATH";
-var TEMP_PROJECT_PATH = "tmp";
+var USAGE = 'Error missing args.\n'
+USAGE += 'Usage: $cordova-paramedic --platform CORDOVA-PLATFORM --plugin PLUGIN-PATH\n';
+USAGE += 'Optional configurations can be set with: --config path/to/config.json';
 var storedCWD = process.cwd();
 var TIMEOUT = 10 * 60 * 1000; // 10 minutes in msec - this will become a param
 
-var plugin,platformId;
+var plugin,platformId,tempProjectPath;
 
 run();
 
-// main program here 
+// main program here
 function run() {
     init();
     createTempProject();
@@ -28,20 +27,24 @@ function run() {
 }
 
 function init() {
-    var argv = parseArgs(process.argv.slice(2),{
-        plugin:".",
-        platform:""
-    });
+    nconf.argv();
 
-    if(!argv.platform || !argv.plugin) {
+    if(!nconf.get('platform') || !nconf.get('plugin')) {
         console.log(USAGE);
         process.exit(1);
     }
 
-    platformId = argv.platform;
-    plugin = argv.plugin;
+    platformId = nconf.get('platform');
+    plugin = nconf.get('plugin');
+    config = nconf.get('config');
+    tempProjectPath = nconf.get('tempProjectPath') || 'tmp';
 
-    var cordovaResult = shell.exec('cordova --version', {silent:true});
+    if (config) {
+        nconf.file({ file: config });
+    }
+
+    console.log('cordova-paramedic :: checking cordova version');
+    var cordovaResult = shell.exec('cordova --version');
     if(cordovaResult.code) {
         console.error(cordovaResult.output);
         process.exit(cordovaResult.code);
@@ -49,13 +52,13 @@ function init() {
 }
 
 function createTempProject() {
-    console.log("cordova-paramedic :: creating temp project");
-    shell.exec('cordova create ' + TEMP_PROJECT_PATH);
-    shell.cd(TEMP_PROJECT_PATH);
+    console.log('cordova-paramedic :: creating temp project');
+    shell.exec('cordova create ' + tempProjectPath);
+    shell.cd(tempProjectPath);
 }
 
 function installPlugins() {
-    //console.log("cordova-paramedic :: installing " + plugin);
+    console.log('cordova-paramedic :: installing ' + plugin);
 
     var installExitCode = shell.exec('cordova plugin add ' + plugin).code;
     if(installExitCode != 0) {
@@ -64,7 +67,7 @@ function installPlugins() {
         return;
     }
 
-    //console.log("cordova-paramedic :: installing " + path.join(plugin,'tests'));
+    console.log('cordova-paramedic :: installing ' + path.join(plugin,'tests'));
     installExitCode = shell.exec('cordova plugin add ' + path.join(plugin,'tests')).code;
     if(installExitCode != 0) {
         console.error('Failed to find /tests/ for plugin : ' + plugin);
@@ -72,7 +75,7 @@ function installPlugins() {
         return;
     }
 
-    //console.log("cordova-paramedic :: installing plugin-test-framework");
+    console.log('cordova-paramedic :: installing plugin-test-framework');
     installExitCode = shell.exec('cordova plugin add https://github.com/apache/cordova-plugin-test-framework').code;
     if(installExitCode != 0) {
         console.error('cordova-plugin-test-framework');
@@ -93,20 +96,53 @@ function addAndRunPlatform() {
         cleanUpAndExitWithCode(1);
     },(TIMEOUT));
 
-    shell.exec('cordova emulate ' + platformId.split("@")[0] + " --phone",
+    var cordovaOptions = platformId.split("@")[0];
+    if(nconf.get('architecture')) {
+        cordovaOptions += ' --archs=' + nconf.get('architecture');
+    }
+    if(nconf.get('device')) {
+        cordovaOptions += ' --device';
+    }
+    if(nconf.get('phone')) {
+        cordovaOptions += ' -- --phone';
+    }
+
+    var buildCommand = 'cordova build ' + cordovaOptions;
+    console.log('cordova-paramedic :: trying to build using command: ' + buildCommand);
+    shell.exec(buildCommand,
         {async:true},
         function(code,output){
-            if(code != 0) {
-                console.error("Error: cordova emulate return error code " + code);
-                console.log("output: " + output);
-                cleanUpAndExitWithCode(1);
-            }
+          if(code != 0) {
+              console.error("Error: cordova build return error code " + code);
+              console.log("output: " + output);
+              cleanUpAndExitWithCode(1);
+          }
+          // If buildOnly configuration was set to true, don't try to run
+          // but exist with success code since build was successful
+          if (nconf.get('buildOnly')) {
+            cleanUpAndExitWithCode(0);
+          }
+          var runCommand = 'cordova run --no-build ' + cordovaOptions;
+          console.log('cordova-paramedic :: trying to run using command: ' + runCommand);
+          shell.exec(runCommand,
+              {async:true},
+              function(code,output){
+                  if(code != 0) {
+                      console.error("Error: cordova run return error code " + code);
+                      console.log("output: " + output);
+                      cleanUpAndExitWithCode(1);
+                  }
+              }
+          );
         }
     );
 }
 
 function cleanUpAndExitWithCode(exitCode) {
     shell.cd(storedCWD);
+    if(nconf.get('removeTempProject')) {
+      shell.rm('-rf', tempProjectPath);
+    }
     process.exit(exitCode);
 }
 
@@ -134,40 +170,24 @@ function setConfigStartPage() {
 
 function startServer() {
 
-    console.log("cordova-paramedic :: starting local medic server " + platformId);
-    var server = http.createServer(requestListener);
-    server.listen(PORT, '127.0.0.1',function onServerConnect() {
+    console.log('cordova-paramedic :: starting local medic server for platform ' + platformId);
 
-        switch(platformId) {
-            case "ios"     :  // intentional fallthrough
-            case "android" :
-            case "windows" :
-                writeMedicLogUrl("http://127.0.0.1:" + PORT);
-                addAndRunPlatform();
-                break;
-            case "wp8" :
-                localtunnel(PORT, tunnelCallback);
-                // request.get('http://google.com/', function(e, res, data) {
-                //     if(e) {
-                //         console.error("failed to detect ip address");
-                //         cleanUpAndExitWithCode(1);
-                //     }
-                //     else {
-                //         console.log("res.req.connection = " + res.req.connection);
-                //         var ip = res.req.connection.localAddress ||
-                //                  res.req.socket.localAddress;
-                //         console.log("Using ip : " + ip);
-                //         writeMedicLogUrl("http://" + ip + ":" + PORT);
-                //         addAndRunPlatform();
-                //     }
-                // });
-                break;
-            default :
-                console.log("platform is not supported :: " + platformId);
-                cleanUpAndExitWithCode(1);
+    request.get('http://google.com/', function(e, res, data) {
+        if(e) {
+            console.error('Failed to detect ip address');
+            cleanUpAndExitWithCode(1);
         }
-
-        //localtunnel(PORT, tunnelCallback); // TODO
+        else {
+            var ip = res.req.connection.localAddress ||
+                     res.req.socket.localAddress ||
+                     '127.0.0.1';
+            console.log('Detected ip address: ' + ip);
+            var server = http.createServer(requestListener);
+            server.listen(PORT, ip, function onServerConnect() {
+                writeMedicLogUrl('http://' + ip + ':' + PORT);
+                addAndRunPlatform();
+            });
+        }
     });
 }
 
@@ -186,10 +206,10 @@ function requestListener(request, response) {
                 try {
                     console.log("body = " + body);
                     var results = JSON.parse(body);
-                    console.log("Results:: ran " + 
-                        results.mobilespec.specs + 
-                        " specs with " + 
-                        results.mobilespec.failures + 
+                    console.log("Results:: ran " +
+                        results.mobilespec.specs +
+                        " specs with " +
+                        results.mobilespec.failures +
                         " failures");
                     if(results.mobilespec.failures > 0) {
                         cleanUpAndExitWithCode(1);
@@ -197,7 +217,7 @@ function requestListener(request, response) {
                     else {
                         cleanUpAndExitWithCode(0);
                     }
-                    
+
                 }
                 catch(err) {
                     console.log("parse error :: " + err);
@@ -216,19 +236,3 @@ function requestListener(request, response) {
         response.end();
     }
 }
-
-function tunnelCallback(err, tunnel) {
-    if (err){
-        console.log("failed to create tunnel url, check your internet connectivity.")
-        cleanUpAndExitWithCode(1);
-    }
-    else {
-        // the assigned public url for your tunnel
-        // i.e. https://abcdefgjhij.localtunnel.me
-        tunneledUrl = tunnel.url;
-        console.log("cordova-paramedic :: tunneledURL = " + tunneledUrl);
-        writeMedicLogUrl(tunneledUrl);
-        addAndRunPlatform();
-    }
-}
-

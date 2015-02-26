@@ -28,8 +28,7 @@
   "author": "Jesse MacFadyen",
   "license": "Apache 2.0",
   "dependencies": {
-    "localtunnel": "~1.5.0",
-    "minimist": "~1.1.0",
+    "nconf": "~0.7.1",
     "request": "^2.53.0",
     "shelljs": "~0.3.0"
   }
