@@ -8,7 +8,6 @@ install:
   - npm install
   - npm link
   - cd ..
-  - git clone https://github.com/apache/cordova-plugin-test-framework
   - cd cordova-paramedic
 script:
   - npm run test-travis

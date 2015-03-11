@@ -90,7 +90,7 @@ function addAndRunPlatform() {
     console.log("cordova-paramedic :: adding platform");
     shell.exec('cordova platform add ' + platformId,{silent:true});
     shell.exec('cordova prepare',{silent:true});
-    // limit runtime to 5 minutes
+    // limit runtime to TIMEOUT msecs
     setTimeout(function(){
         console.error("This test seems to be blocked :: timeout exceeded. Exiting ...");
         cleanUpAndExitWithCode(1);
