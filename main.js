@@ -28,10 +28,9 @@ function run() {
 }
 
 function init() {
-    var argv = parseArgs(process.argv.slice(2),{
-        plugin:".",
-        platform:""
-    });
+    var argv = parseArgs(process.argv.slice(2),{default:{
+        timeout:TIMEOUT
+    }});
 
     if(!argv.platform || !argv.plugin) {
         console.log(USAGE);
