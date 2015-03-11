@@ -29,8 +29,6 @@ function run() {
 
 function init() {
     var argv = parseArgs(process.argv.slice(2),{default:{
-        plugin:".",
-        platform:"",
         timeout:TIMEOUT
     }});
 
