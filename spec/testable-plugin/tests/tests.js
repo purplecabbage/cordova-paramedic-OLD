@@ -23,7 +23,7 @@ exports.defineAutoTests = function() {
   describe('Testable', function () {
 
     it("should pass a test", function() {
-      expect(true);
+      expect(window).toBeDefined();
     });
 
     it("should exist", function() {
