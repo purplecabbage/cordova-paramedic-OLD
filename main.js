@@ -143,27 +143,31 @@ function startServer() {
 
         switch(platformId) {
             case "ios"     :  // intentional fallthrough
-            case "android" :
             case "windows" :
                 writeMedicLogUrl("http://127.0.0.1:" + PORT);
                 addAndRunPlatform();
                 break;
+            case "android" :
+                writeMedicLogUrl("http://10.0.2.2:" + PORT);
+                addAndRunPlatform();
+                break;
+                break;
             case "wp8" :
-                localtunnel(PORT, tunnelCallback);
-                // request.get('http://google.com/', function(e, res, data) {
-                //     if(e) {
-                //         console.error("failed to detect ip address");
-                //         cleanUpAndExitWithCode(1);
-                //     }
-                //     else {
-                //         console.log("res.req.connection = " + res.req.connection);
-                //         var ip = res.req.connection.localAddress ||
-                //                  res.req.socket.localAddress;
-                //         console.log("Using ip : " + ip);
-                //         writeMedicLogUrl("http://" + ip + ":" + PORT);
-                //         addAndRunPlatform();
-                //     }
-                // });
+                //localtunnel(PORT, tunnelCallback);
+                request.get('http://google.com/', function(e, res, data) {
+                    if(e) {
+                        console.error("failed to detect ip address");
+                        cleanUpAndExitWithCode(1);
+                    }
+                    else {
+                        console.log("res.req.connection = " + res.req.connection);
+                        var ip = res.req.connection.localAddress ||
+                                 res.req.socket.localAddress;
+                        console.log("Using ip : " + ip);
+                        writeMedicLogUrl("http://" + ip + ":" + PORT);
+                        addAndRunPlatform();
+                    }
+                });
                 break;
             default :
                 console.log("platform is not supported :: " + platformId);
