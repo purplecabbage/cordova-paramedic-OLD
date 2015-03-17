@@ -1,4 +1,4 @@
-language: objective-c
+language: android
 node_js:
   - "0.10"
 install:
@@ -8,4 +8,4 @@ install:
   - npm install
   - npm link
 script:
-  - npm run test-travis
+  - npm run test-android
