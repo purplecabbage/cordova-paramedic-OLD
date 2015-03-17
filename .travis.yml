@@ -6,5 +6,12 @@ install:
   - npm install cordova
   - npm install
   - npm link
+
+  # Emulator Management: Create, Start and Wait
+before_script:
+  - echo no | android create avd --force -n test -t android-19 --abi armeabi-v7a
+  - emulator -avd test -no-skin -no-audio -no-window &
+  - adb shell input keyevent 82 &
+
 script:
   - npm run test-android
