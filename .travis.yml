@@ -4,7 +4,6 @@ node_js:
 install:
   - echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config 
   - npm install cordova
-  - npm install ios-sim
   - npm install
   - npm link
 script:
