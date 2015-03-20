@@ -10,28 +10,27 @@ var http = require('http'),
 
 var tunneledUrl = "";
 var PORT = 8008;
+var TIMEOUT = 10 * 60 * 1000; // 10 minutes in msec - this will become a param
 var USAGE = "Error missing args. \n Usage: $cordova-paramedic " +
             "  --platform CORDOVA-PLATFORM --plugin PLUGIN-PATH [--port PORT]";
+
 var TEMP_PROJECT_PATH = "tmp";
 var storedCWD = process.cwd();
-var TIMEOUT = 10 * 60 * 1000; // 10 minutes in msec - this will become a param
+
+var JustBuild = false;
 
 var plugin,platformId;
 
-run();
 
-// main program here 
-function run() {
+(function run_main() { // main program here 
     init();
     createTempProject();
     installPlugins();
     startServer();
-}
+})();
 
 function init() {
-    var argv = parseArgs(process.argv.slice(2),{default:{
-        timeout:TIMEOUT
-    }});
+    var argv = parseArgs(process.argv.slice(2));
 
     if(!argv.platform || !argv.plugin) {
         console.log(USAGE);
@@ -40,10 +39,11 @@ function init() {
 
     platformId = argv.platform;
     plugin = argv.plugin;
-    // TODO: validate that it is a number
+
+    // TODO: validate that port is a number
     PORT = argv.port || PORT;
-
-
+    JustBuild = argv.justbuild || JustBuild; 
+    TIMEOUT = argv.timeout || TIMEOUT;
 
     var cordovaResult = shell.exec('cordova --version', {silent:true});
     if(cordovaResult.code) {
@@ -70,47 +70,72 @@ function installPlugins() {
         return;
     }
 
-    console.log("cordova-paramedic :: installing " + path.join(plugin,'tests'));
-    installExitCode = shell.exec('cordova plugin add ' + path.join(plugin,'tests'),
-                                 {silent:true}).code;
-    if(installExitCode != 0) {
-        console.error('Failed to find /tests/ for plugin : ' + plugin);
-        cleanUpAndExitWithCode(1);
-        return;
-    }
+    if(!JustBuild) { 
+        // we only install the test stuff if needed
+        console.log("cordova-paramedic :: installing " + path.join(plugin,'tests'));
+        installExitCode = shell.exec('cordova plugin add ' + path.join(plugin,'tests'),
+                                     {silent:true}).code;
+        if(installExitCode != 0) {
+            console.error('Failed to find /tests/ for plugin : ' + plugin);
+            cleanUpAndExitWithCode(1);
+            return;
+        }
 
-    console.log("cordova-paramedic :: installing plugin-test-framework");
-    installExitCode = shell.exec('cordova plugin add https://github.com/apache/cordova-plugin-test-framework',
-                                 {silent:true}).code;
-    if(installExitCode != 0) {
-        console.error('cordova-plugin-test-framework');
-        cleanUpAndExitWithCode(1);
-        return;
+        console.log("cordova-paramedic :: installing plugin-test-framework");
+        installExitCode = shell.exec('cordova plugin add https://github.com/apache/cordova-plugin-test-framework',
+                                     {silent:true}).code;
+        if(installExitCode != 0) {
+            console.error('cordova-plugin-test-framework');
+            cleanUpAndExitWithCode(1);
+            return;
+        }
     }
-
 }
 
 function addAndRunPlatform() {
-    setConfigStartPage();
-    console.log("cordova-paramedic :: adding platform");
-    shell.exec('cordova platform add ' + platformId,{silent:true});
-    shell.exec('cordova prepare',{silent:true});
-    // limit runtime to TIMEOUT msecs
-    setTimeout(function(){
-        console.error("This test seems to be blocked :: timeout exceeded. Exiting ...");
-        cleanUpAndExitWithCode(1);
-    },(TIMEOUT));
 
-    shell.exec('cordova emulate ' + platformId.split("@")[0] + " --phone",
-        {async:true,silent:true},
-        function(code,output){
-            if(code != 0) {
-                console.error("Error: cordova emulate return error code " + code);
-                console.log("output: " + output);
-                cleanUpAndExitWithCode(1);
+    if(JustBuild) {
+        console.log("cordova-paramedic :: adding platform");
+        shell.exec('cordova platform add ' + platformId,{silent:true});
+        shell.exec('cordova prepare',{silent:true});
+        console.log("building ...");
+        shell.exec('cordova build ' + platformId.split("@")[0],
+            {async:true,silent:true},
+            function(code,output){
+                if(code != 0) {
+                    console.error("Error: cordova build returned error code " + code);
+                    console.log("output: " + output);
+                    cleanUpAndExitWithCode(1);
+                }
+                else {
+                    console.log("lookin' good!");
+                    cleanUpAndExitWithCode(0);
+                }
             }
-        }
-    );
+        );
+    }
+    else {
+        setConfigStartPage();
+        console.log("cordova-paramedic :: adding platform");
+        shell.exec('cordova platform add ' + platformId,{silent:true});
+        shell.exec('cordova prepare',{silent:true});
+        // limit runtime to TIMEOUT msecs
+        setTimeout(function(){
+            console.error("This test seems to be blocked :: timeout exceeded. Exiting ...");
+            cleanUpAndExitWithCode(1);
+        },(TIMEOUT));
+
+        shell.exec('cordova emulate ' + platformId.split("@")[0] + " --phone",
+            {async:true,silent:true},
+            function(code,output){
+                if(code != 0) {
+                    console.error("Error: cordova emulate return error code " + code);
+                    console.log("output: " + output);
+                    cleanUpAndExitWithCode(1);
+                }
+            }
+        );
+    }
 }
 
 function cleanUpAndExitWithCode(exitCode) {
@@ -141,6 +166,11 @@ function setConfigStartPage() {
 }
 
 function startServer() {
+
+    if(JustBuild) {
+        addAndRunPlatform();
+        return;
+    }
 
     console.log("cordova-paramedic :: starting local medic server " + platformId);
     var server = http.createServer(requestListener);
