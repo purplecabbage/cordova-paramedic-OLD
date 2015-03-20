@@ -6,6 +6,7 @@ var http = require('http'),
     shell = require('shelljs'),
     fs = require('fs'),
     request = require('request'),
+    tmp = require('tmp'),
     path = require('path');
 
 var tunneledUrl = "";
@@ -14,7 +15,7 @@ var TIMEOUT = 10 * 60 * 1000; // 10 minutes in msec - this will become a param
 var USAGE = "Error missing args. \n Usage: $cordova-paramedic " +
             "  --platform CORDOVA-PLATFORM --plugin PLUGIN-PATH [--port PORT]";
 
-var TEMP_PROJECT_PATH = "tmp";
+var TMP_FOLDER = null;
 var storedCWD = process.cwd();
 
 var JustBuild = false;
@@ -53,9 +54,12 @@ function init() {
 }
 
 function createTempProject() {
+    TMP_FOLDER = tmp.dirSync();
+    tmp.setGracefulCleanup();
+    
     console.log("cordova-paramedic :: creating temp project");
-    shell.exec('cordova create ' + TEMP_PROJECT_PATH);
-    shell.cd(TEMP_PROJECT_PATH);
+    shell.exec('cordova create ' + TMP_FOLDER.name);
+    shell.cd(TMP_FOLDER.name);
 }
 
 function installPlugins() {
@@ -140,6 +144,9 @@ function addAndRunPlatform() {
 
 function cleanUpAndExitWithCode(exitCode) {
     shell.cd(storedCWD);
+    // the TMP_FOLDER.removeCallback() call is throwing an exception, so we explicitly delete it here
+    shell.exec('rm -rf ' + TMP_FOLDER.name);
+    
     process.exit(exitCode);
 }
 
