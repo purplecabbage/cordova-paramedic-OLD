@@ -10,7 +10,8 @@ var http = require('http'),
 
 var tunneledUrl = "";
 var PORT = 8008;
-var USAGE = "Error missing args. \n Usage: $cordova-paramedic --platform CORDOVA-PLATFORM --plugin PLUGIN-PATH";
+var USAGE = "Error missing args. \n Usage: $cordova-paramedic " +
+            "  --platform CORDOVA-PLATFORM --plugin PLUGIN-PATH [--port PORT]";
 var TEMP_PROJECT_PATH = "tmp";
 var storedCWD = process.cwd();
 var TIMEOUT = 10 * 60 * 1000; // 10 minutes in msec - this will become a param
@@ -39,6 +40,10 @@ function init() {
 
     platformId = argv.platform;
     plugin = argv.plugin;
+    // TODO: validate that it is a number
+    PORT = argv.port || PORT;
+
+
 
     var cordovaResult = shell.exec('cordova --version', {silent:true});
     if(cordovaResult.code) {
