@@ -12,7 +12,9 @@ To install :
 
 Usage :
 
-```cordova-paramedic --platform CORDOVA-PLATFORM --plugin PLUGIN-PATH```
-CORDOVA-PLATFORM : the platform id, currently only supports 'ios'
-PLUGIN-PATH : the relative path to the plugin folder, expected to have a 'tests' folder
+```cordova-paramedic --platform CORDOVA-PLATFORM --plugin PLUGIN-PATH --justbuild```
+
+    CORDOVA-PLATFORM : the platform id, currently only supports 'ios'
+    PLUGIN-PATH : the relative path to the plugin folder, expected to have a 'tests' folder
+    --justbuild : just builds the project, without running the tests
 
