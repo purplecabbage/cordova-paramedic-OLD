@@ -66,7 +66,7 @@ function installPlugins() {
 
     console.log("cordova-paramedic :: installing " + plugin);
     
-    var pluginPath = path.join(storedCWD, plugin);
+    var pluginPath = path.resolve(storedCWD, plugin);
 
     var installExitCode = shell.exec('cordova plugin add ' + pluginPath,
                                      {silent:true}).code;
