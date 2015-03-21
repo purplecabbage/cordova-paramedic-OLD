@@ -21,10 +21,10 @@
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
     xmlns:rim="http://www.blackberry.com/ns/widgets"
     xmlns:android="http://schemas.android.com/apk/res/android"
-    id="org.apache.cordova.build-fail-plugin"
+    id="org.apache.cordova.build-success-plugin"
     version="0.0.1">
-    <name>Build Fail Plugin</name>
-    <description>Cordova Build Fail Plugin</description>
+    <name>Build Success Plugin</name>
+    <description>Cordova Build Success Plugin</description>
     <license>Apache 2.0</license>
     <keywords>cordova</keywords>
     <repo></repo>
@@ -33,8 +33,8 @@
 
     <!-- ios -->
     <platform name="ios">
-        <header-file src="src/ios/CDVBuildFailPlugin.h" />
-        <source-file src="src/ios/CDVBuildFailPlugin.m" />
+        <header-file src="src/ios/CDVBuildSuccessPlugin.h" />
+        <source-file src="src/ios/CDVBuildSuccessPlugin.m" />
     </platform>
 
     <platform name="android"/>
