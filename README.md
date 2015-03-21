@@ -16,6 +16,7 @@ Usage :
 
     CORDOVA-PLATFORM : the platform id, currently only supports 'ios'
     PLUGIN-PATH : the relative path to the plugin folder, expected to have a 'tests' folder
+                : you may specify multiple --plugin flags and they will all be installed and tested
     MSECS : (optional) time in millisecs to wait for tests to pass|fail ( defaults to 10 minutes )
     PORTNUM : (optional) port to use for posting results from emulator back to paramedic server
     --justbuild : (optional) just builds the project, without running the tests
