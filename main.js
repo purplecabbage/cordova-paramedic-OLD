@@ -65,8 +65,10 @@ function createTempProject() {
 function installPlugins() {
 
     console.log("cordova-paramedic :: installing " + plugin);
+    
+    var pluginPath = path.join(storedCWD, plugin);
 
-    var installExitCode = shell.exec('cordova plugin add ' + plugin,
+    var installExitCode = shell.exec('cordova plugin add ' + pluginPath,
                                      {silent:true}).code;
     if(installExitCode != 0) {
         console.error('Failed to install plugin : ' + plugin);
@@ -76,8 +78,8 @@ function installPlugins() {
 
     if(!JustBuild) { 
         // we only install the test stuff if needed
-        console.log("cordova-paramedic :: installing " + path.join(plugin,'tests'));
-        installExitCode = shell.exec('cordova plugin add ' + path.join(plugin,'tests'),
+        console.log("cordova-paramedic :: installing " + path.join(pluginPath,'tests'));
+        installExitCode = shell.exec('cordova plugin add ' + path.join(pluginPath,'tests'),
                                      {silent:true}).code;
         if(installExitCode != 0) {
             console.error('Failed to find /tests/ for plugin : ' + plugin);
