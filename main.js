@@ -19,7 +19,8 @@ var storedCWD = process.cwd();
 
 var JustBuild = false;
 
-var plugin,platformId;
+var plugins,
+    platformId;
 
 
 (function run_main() { // main program here 
@@ -38,7 +39,9 @@ function init() {
     }
 
     platformId = argv.platform;
-    plugin = argv.plugin;
+    plugins = argv.plugin;
+    plugins = Array.isArray(plugins) ? plugins : [plugins];
+
 
     // TODO: validate that port is a number
     PORT = argv.port || PORT;
@@ -58,33 +61,36 @@ function createTempProject() {
     shell.cd(TEMP_PROJECT_PATH);
 }
 
-function installPlugins() {
-
+function installSinglePlugin(plugin) {
     console.log("cordova-paramedic :: installing " + plugin);
 
     var installExitCode = shell.exec('cordova plugin add ' + plugin,
                                      {silent:true}).code;
-    if(installExitCode != 0) {
+    if(installExitCode !== 0) {
         console.error('Failed to install plugin : ' + plugin);
         cleanUpAndExitWithCode(1);
         return;
     }
+}
 
-    if(!JustBuild) { 
-        // we only install the test stuff if needed
-        console.log("cordova-paramedic :: installing " + path.join(plugin,'tests'));
-        installExitCode = shell.exec('cordova plugin add ' + path.join(plugin,'tests'),
-                                     {silent:true}).code;
-        if(installExitCode != 0) {
-            console.error('Failed to find /tests/ for plugin : ' + plugin);
-            cleanUpAndExitWithCode(1);
-            return;
+function installPlugins() {
+
+    for(var n = 0; n < plugins.length; n++) {
+
+        var plugin = plugins[n];
+        installSinglePlugin(plugin);
+
+        if(!JustBuild) {
+            installSinglePlugin(path.join(plugin,"tests"));
         }
+    }
 
+
+    if(!JustBuild) {
         console.log("cordova-paramedic :: installing plugin-test-framework");
         installExitCode = shell.exec('cordova plugin add https://github.com/apache/cordova-plugin-test-framework',
                                      {silent:true}).code;
-        if(installExitCode != 0) {
+        if(installExitCode !== 0) {
             console.error('cordova-plugin-test-framework');
             cleanUpAndExitWithCode(1);
             return;
@@ -102,7 +108,7 @@ function addAndRunPlatform() {
         shell.exec('cordova build ' + platformId.split("@")[0],
             {async:true,silent:true},
             function(code,output){
-                if(code != 0) {
+                if(code !== 0) {
                     console.error("Error: cordova build returned error code " + code);
                     console.log("output: " + output);
                     cleanUpAndExitWithCode(1);
@@ -128,7 +134,7 @@ function addAndRunPlatform() {
         shell.exec('cordova emulate ' + platformId.split("@")[0] + " --phone",
             {async:true,silent:true},
             function(code,output){
-                if(code != 0) {
+                if(code !== 0) {
                     console.error("Error: cordova emulate return error code " + code);
                     console.log("output: " + output);
                     cleanUpAndExitWithCode(1);
@@ -185,7 +191,6 @@ function startServer() {
             case "android" :
                 writeMedicLogUrl("http://10.0.2.2:" + PORT);
                 addAndRunPlatform();
-                break;
                 break;
             case "wp8" :
                 //localtunnel(PORT, tunnelCallback);
@@ -259,7 +264,7 @@ function requestListener(request, response) {
 
 function tunnelCallback(err, tunnel) {
     if (err){
-        console.log("failed to create tunnel url, check your internet connectivity.")
+        console.log("failed to create tunnel url, check your internet connectivity.");
         cleanUpAndExitWithCode(1);
     }
     else {
