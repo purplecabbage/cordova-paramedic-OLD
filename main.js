@@ -114,20 +114,22 @@ function addAndRunPlatform() {
         var platform_add_success = function() {
             shell.exec('cordova prepare',{silent:true});
             console.log("building ...");
-            var platform_build = child_process.exec(
-                'cordova build ' + platformId.split("@")[0],
-                { timeout : TIMEOUT },
-                function(error, stdout, stderr) {
-                    if (error) {
-                        console.error("Error: cordova build returned error code " + error.code);
-                        console.log(stdout)
-                        cleanUpAndExitWithCode(1);
-                    } else {
-                        console.log("lookin' good!");
-                        cleanUpAndExitWithCode(0);
-                    }
-                }
+            
+            var platform_build = child_process.spawn(
+                'cordova',
+                ['build', platformId.split("@")[0] ],
+                { timeout : TIMEOUT, stdio: "inherit" }
             );
+            
+            platform_build.on('close', function(code) {
+                if (code != 0) {
+                    console.error("Error: cordova build returned error code " + code);
+                    cleanUpAndExitWithCode(1);
+                } else {
+                    console.log("lookin' good!");
+                    cleanUpAndExitWithCode(0);
+                }
+            });
         };
         
         var platform_add  = child_process.exec(
