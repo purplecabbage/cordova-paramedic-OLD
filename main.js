@@ -7,7 +7,8 @@ var http = require('http'),
     fs = require('fs'),
     request = require('request'),
     tmp = require('tmp'),
-    path = require('path');
+    path = require('path'),
+    child_process = require('child_process');
 
 var tunneledUrl = "";
 var PORT = 8008;
@@ -109,23 +110,41 @@ function addAndRunPlatform() {
 
     if(JustBuild) {
         console.log("cordova-paramedic :: adding platform");
-        shell.exec('cordova platform add ' + platformId,{silent:true});
-        shell.exec('cordova prepare',{silent:true});
-        console.log("building ...");
-        shell.exec('cordova build ' + platformId.split("@")[0],
-            {async:true,silent:true},
-            function(code,output){
-                if(code !== 0) {
+        
+        var platform_add_success = function() {
+            shell.exec('cordova prepare',{silent:true});
+            console.log("building ...");
+            
+            var platform_build = child_process.spawn(
+                'cordova',
+                ['build', platformId.split("@")[0] ],
+                { timeout : TIMEOUT, stdio: "inherit" }
+            );
+            
+            platform_build.on('close', function(code) {
+                if (code != 0) {
                     console.error("Error: cordova build returned error code " + code);
-                    console.log("output: " + output);
                     cleanUpAndExitWithCode(1);
-                }
-                else {
+                } else {
                     console.log("lookin' good!");
                     cleanUpAndExitWithCode(0);
                 }
+            });
+        };
+        
+        var platform_add  = child_process.exec(
+            'cordova platform add ' + platformId, 
+            { timeout: TIMEOUT }, 
+            function(error, stdout, stderr) {
+                if (error) {
+                    console.log(error);
+                    cleanUpAndExitWithCode(1);
+                } else {
+                    platform_add_success();
+                }
             }
         );
+        
     }
     else {
         setConfigStartPage();
