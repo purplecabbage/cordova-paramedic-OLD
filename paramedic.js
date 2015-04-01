@@ -19,16 +19,23 @@ var storedCWD = process.cwd();
 var JustBuild = false;
 
 var plugins,
-    platformId;
+    platformId,
+    callback;
 
 
-exports.run = function(_platformId,_plugins,bJustBuild,nPort,msTimeout) {
+exports.run = function(_platformId,_plugins,_callback,bJustBuild,nPort,msTimeout) {
 
     if(_platformId && _plugins) {
 
         platformId = _platformId;
         // make it an array if it's not
         plugins = Array.isArray(_plugins) ? _plugins : [_plugins];
+
+        // if we are passed a callback, we will use it, 
+        // otherwise just make a quick and dirty one
+        callback = ( _callback && _callback.apply ) ? _callback : function(resCode,resObj) {
+            process.exit(resCode);
+        };
 
         JustBuild = bJustBuild == true;
         PORT = nPort || PORT;
@@ -146,12 +153,12 @@ function addAndRunPlatform() {
     }
 }
 
-function cleanUpAndExitWithCode(exitCode) {
+function cleanUpAndExitWithCode(exitCode,resultsObj) {
     shell.cd(storedCWD);
     // the TMP_FOLDER.removeCallback() call is throwing an exception, so we explicitly delete it here
     shell.exec('rm -rf ' + TMP_FOLDER.name);
     
-    process.exit(exitCode);
+    callback(exitCode,resultsObj);
 }
 
 function writeMedicLogUrl(url) {
@@ -242,10 +249,10 @@ function requestListener(request, response) {
                         results.mobilespec.failures + 
                         " failures");
                     if(results.mobilespec.failures > 0) {
-                        cleanUpAndExitWithCode(1);
+                        cleanUpAndExitWithCode(1,results);
                     }
                     else {
-                        cleanUpAndExitWithCode(0);
+                        cleanUpAndExitWithCode(0,results);
                     }
                     
                 }
