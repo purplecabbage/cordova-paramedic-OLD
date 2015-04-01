@@ -6,12 +6,17 @@ var parseArgs = require('minimist'),
 var plugins,
     platformId;
 
-var USAGE = "Error missing args. \n Usage: $cordova-paramedic " +
-            "  --platform CORDOVA-PLATFORM --plugin PLUGIN-PATH [--justbuild ] [--port PORT] [--timeout TIMEOUT] \n" +
-            " CORDOVA-PLATFORM : Which platform to build target\n" +
-            " PLUGIN-PATH : Path to the plugin to install.\n" +
-            " --justbuild : Will not run tests, just verify that the plugin+platform can be built.\n" +
-            " TIMEOUT : time to wait for tests to run, in msecs, default is 10 minutes."; 
+var USAGE = "Error missing args. \n" +
+	"cordova-paramedic --platform PLATFORM --plugin PATH [--justbuild --timeout MSECS --port PORTNUM]" +
+	"`PLATFORM` : the platform id, currently only supports 'ios'\n" +
+	"`PATH` : the relative or absolute path to a plugin folder\n" +
+					"\texpected to have a 'tests' folder.\n" +  
+					"\tYou may specify multiple --plugin flags and they will all\n" + 
+					"\tbe installed and tested together.\n" +
+	"`MSECS` : (optional) time in millisecs to wait for tests to pass|fail \n" +
+			  "\t(defaults to 10 minutes) \n" +
+	"`PORTNUM` : (optional) port to use for posting results from emulator back to paramedic server\n" +
+	"--justbuild : (optional) just builds the project, without running the tests"; 
 
 var argv = parseArgs(process.argv.slice(2));
 
