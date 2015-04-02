@@ -29,11 +29,12 @@ platformId = argv.platform;
 plugins = argv.plugin;
 plugins = Array.isArray(plugins) ? plugins : [plugins];
 
-var onComplete = function(resCode,resObj) {
-	console.log("result is : " + resCode + "\n" + JSON.stringify(resObj));
+var onComplete = function(resCode,resObj,logStr) {
+	console.log("result code is : " + resCode + "\n" + JSON.stringify(resObj));
+	console.log(logStr);
 	process.exit(resCode);
 }
 
 
-paramedic.run(platformId, plugins, onComplete, argv.justbuild, argv.port, argv.timeout);
+paramedic.run(platformId, plugins, onComplete, argv.justbuild, argv.port, argv.timeout,true);
 

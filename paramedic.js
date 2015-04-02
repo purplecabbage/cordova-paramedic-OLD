@@ -18,12 +18,15 @@ var storedCWD = process.cwd();
 
 var JustBuild = false;
 
+var logMessage;// function
+var logOutput;
+
 var plugins,
     platformId,
     callback;
 
 
-exports.run = function(_platformId,_plugins,_callback,bJustBuild,nPort,msTimeout) {
+exports.run = function(_platformId,_plugins,_callback,bJustBuild,nPort,msTimeout,bSilent) {
 
     if(_platformId && _plugins) {
 
@@ -40,10 +43,21 @@ exports.run = function(_platformId,_plugins,_callback,bJustBuild,nPort,msTimeout
         JustBuild = bJustBuild == true;
         PORT = nPort || PORT;
         TIMEOUT = msTimeout || TIMEOUT;
+        if(bSilent) {
+            logOutput = [];
+            logMessage = function(msg) {
+                logOutput.push(msg);
+            };
+        }
+        else {
+            logMessage = function(msg) {
+                console.log(msg);
+            };
+        }
 
         var cordovaResult = shell.exec('cordova --version', {silent:true});
         if(cordovaResult.code) {
-            console.error(cordovaResult.output);
+            logMessage(cordovaResult.output);
             process.exit(cordovaResult.code);
         }
 
@@ -52,7 +66,7 @@ exports.run = function(_platformId,_plugins,_callback,bJustBuild,nPort,msTimeout
         startServer();
     }
     else {
-        console.log("Error : Missing platformId and/or plugins");
+        console.error("Error : Missing platformId and/or plugins");
     }
 
 }
@@ -62,20 +76,20 @@ function createTempProject() {
     TMP_FOLDER = tmp.dirSync();
     tmp.setGracefulCleanup();
     
-    console.log("cordova-paramedic :: creating temp project");
-    shell.exec('cordova create ' + TMP_FOLDER.name);
+    logMessage("cordova-paramedic: creating temp project");
+    shell.exec('cordova create ' + TMP_FOLDER.name,{silent:true});
     shell.cd(TMP_FOLDER.name);
 }
 
 function installSinglePlugin(plugin) {
-    console.log("cordova-paramedic :: installing " + plugin);
+    logMessage("cordova-paramedic: installing " + plugin);
     
     var pluginPath = path.resolve(storedCWD, plugin);
 
     var installExitCode = shell.exec('cordova plugin add ' + pluginPath,
                                      {silent:true}).code;
     if(installExitCode !== 0) {
-        console.error('Failed to install plugin : ' + plugin);
+        logMessage('Failed to install plugin : ' + plugin);
         cleanUpAndExitWithCode(1);
         return;
     }
@@ -96,11 +110,11 @@ function installPlugins() {
 
 
     if(!JustBuild) {
-        console.log("cordova-paramedic :: installing plugin-test-framework");
+        logMessage("cordova-paramedic: installing plugin-test-framework");
         installExitCode = shell.exec('cordova plugin add https://github.com/apache/cordova-plugin-test-framework',
                                      {silent:true}).code;
         if(installExitCode !== 0) {
-            console.error('cordova-plugin-test-framework');
+            logMessage('cordova-plugin-test-framework');
             cleanUpAndExitWithCode(1);
             return;
         }
@@ -110,20 +124,19 @@ function installPlugins() {
 function addAndRunPlatform() {
 
     if(JustBuild) {
-        console.log("cordova-paramedic :: adding platform");
+        logMessage("cordova-paramedic: adding platform");
         shell.exec('cordova platform add ' + platformId,{silent:true});
         shell.exec('cordova prepare',{silent:true});
-        console.log("building ...");
+        logMessage("building ...");
         shell.exec('cordova build ' + platformId.split("@")[0],
             {async:true,silent:true},
             function(code,output){
                 if(code !== 0) {
-                    console.error("Error: cordova build returned error code " + code);
-                    console.log("output: " + output);
+                    logMessage("Error: cordova build returned error code " + code);
+                    logMessage("output: " + output);
                     cleanUpAndExitWithCode(1);
                 }
                 else {
-                    console.log("lookin' good!");
                     cleanUpAndExitWithCode(0);
                 }
             }
@@ -131,12 +144,12 @@ function addAndRunPlatform() {
     }
     else {
         setConfigStartPage();
-        console.log("cordova-paramedic :: adding platform");
+        logMessage("cordova-paramedic: adding platform");
         shell.exec('cordova platform add ' + platformId,{silent:true});
         shell.exec('cordova prepare',{silent:true});
         // limit runtime to TIMEOUT msecs
         setTimeout(function(){
-            console.error("This test seems to be blocked :: timeout exceeded. Exiting ...");
+            LogMessage("This test seems to be blocked :: timeout exceeded. Exiting ...");
             cleanUpAndExitWithCode(1);
         },(TIMEOUT));
 
@@ -144,8 +157,8 @@ function addAndRunPlatform() {
             {async:true,silent:true},
             function(code,output){
                 if(code !== 0) {
-                    console.error("Error: cordova emulate return error code " + code);
-                    console.log("output: " + output);
+                    logMessage("Error: cordova emulate return error code " + code);
+                    logMessage("output: " + output);
                     cleanUpAndExitWithCode(1);
                 }
             }
@@ -157,12 +170,12 @@ function cleanUpAndExitWithCode(exitCode,resultsObj) {
     shell.cd(storedCWD);
     // the TMP_FOLDER.removeCallback() call is throwing an exception, so we explicitly delete it here
     shell.exec('rm -rf ' + TMP_FOLDER.name);
-    
-    callback(exitCode,resultsObj);
+    var logStr = logOutput ? logOutput.join("\n") : null;
+    callback(exitCode,resultsObj,logStr);
 }
 
 function writeMedicLogUrl(url) {
-    console.log("cordova-paramedic :: writing medic log url to project");
+    logMessage("cordova-paramedic: writing medic log url to project");
     var obj = {logurl:url};
     fs.writeFileSync(path.join("www","medic.json"),JSON.stringify(obj));
 }
@@ -170,7 +183,7 @@ function writeMedicLogUrl(url) {
 
 function setConfigStartPage() {
 
-    console.log("cordova-paramedic :: setting app start page to test page");
+    logMessage("cordova-paramedic: setting app start page to test page");
 
     var fileName = 'config.xml';
     var configStr = fs.readFileSync(fileName).toString();
@@ -179,7 +192,7 @@ function setConfigStartPage() {
         fs.writeFileSync(fileName, configStr);
     }
     else {
-        console.error("Oops, could not find config.xml");
+        logMessage("Oops, could not find config.xml");
     }
 }
 
@@ -190,7 +203,7 @@ function startServer() {
         return;
     }
 
-    console.log("cordova-paramedic :: starting local medic server " + platformId);
+    logMessage("cordova-paramedic: starting local medic server " + platformId);
     var server = http.createServer(requestListener);
     server.listen(PORT, '127.0.0.1',function onServerConnect() {
 
@@ -208,21 +221,21 @@ function startServer() {
                 //localtunnel(PORT, tunnelCallback);
                 request.get('http://google.com/', function(e, res, data) {
                     if(e) {
-                        console.error("failed to detect ip address");
+                        logMessage("failed to detect ip address");
                         cleanUpAndExitWithCode(1);
                     }
                     else {
-                        console.log("res.req.connection = " + res.req.connection);
+                        logMessage("res.req.connection = " + res.req.connection);
                         var ip = res.req.connection.localAddress ||
                                  res.req.socket.localAddress;
-                        console.log("Using ip : " + ip);
+                        logMessage("Using ip : " + ip);
                         writeMedicLogUrl("http://" + ip + ":" + PORT);
                         addAndRunPlatform();
                     }
                 });
                 break;
             default :
-                console.log("platform is not supported :: " + platformId);
+                logMessage("platform is not supported :: " + platformId);
                 cleanUpAndExitWithCode(1);
         }
     });
@@ -241,9 +254,9 @@ function requestListener(request, response) {
         request.on('end', function (res) {
             if(body.indexOf("mobilespec")  == 2){ // {\"mobilespec\":{...}}
                 try {
-                    console.log("body = " + body);
+                    //logMessage("body = " + body);
                     var results = JSON.parse(body);
-                    console.log("Results:: ran " + 
+                    logMessage("Results: ran " + 
                         results.mobilespec.specs + 
                         " specs with " + 
                         results.mobilespec.failures + 
@@ -257,17 +270,17 @@ function requestListener(request, response) {
                     
                 }
                 catch(err) {
-                    console.log("parse error :: " + err);
+                    logMessage("parse error :: " + err);
                     cleanUpAndExitWithCode(1);
                 }
             }
             else {
-                console.log("console-log:" + body);
+                logMessage("console-log:" + body);
             }
         });
     }
     else {
-        console.log(request.method);
+        logMessage(request.method);
         response.writeHead(200, { 'Content-Type': 'text/plain'});
         response.write("Hello"); // sanity check to make sure server is running
         response.end();
@@ -276,14 +289,14 @@ function requestListener(request, response) {
 
 function tunnelCallback(err, tunnel) {
     if (err){
-        console.log("failed to create tunnel url, check your internet connectivity.");
+        logMessage("failed to create tunnel url, check your internet connectivity.");
         cleanUpAndExitWithCode(1);
     }
     else {
         // the assigned public url for your tunnel
         // i.e. https://abcdefgjhij.localtunnel.me
         tunneledUrl = tunnel.url;
-        console.log("cordova-paramedic :: tunneledURL = " + tunneledUrl);
+        logMessage("cordova-paramedic: tunneledURL = " + tunneledUrl);
         writeMedicLogUrl(tunneledUrl);
         addAndRunPlatform();
     }
