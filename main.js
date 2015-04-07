@@ -76,7 +76,7 @@ function installPlugins() {
     }
 
     console.log('cordova-paramedic :: installing plugin-test-framework');
-    installExitCode = shell.exec('cordova plugin add https://github.com/apache/cordova-plugin-test-framework').code;
+    installExitCode = shell.exec('cordova plugin add https://github.com/vjrantal/cordova-plugin-test-framework').code;
     if(installExitCode != 0) {
         console.error('cordova-plugin-test-framework');
         cleanUpAndExitWithCode(1);
