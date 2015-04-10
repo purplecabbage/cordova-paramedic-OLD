@@ -11,7 +11,8 @@
     "url": "git://github.com/purplecabbage/cordova-paramedic.git"
   },
   "scripts": {
-    "test":"npm run test-ios",
+    "test":"npm run jshint & npm run test-ios",
+    "jshint":"node node_modules/jshint/bin/jshint *.js",
     "test-appveyor":"npm run test-windows",
     "test-travis":"npm run test-ios",
     "test-android":"node main.js --platform android --plugin ./spec/testable-plugin/",
@@ -33,5 +34,9 @@
     "request": "^2.53.0",
     "shelljs": "~0.3.0",
     "tmp": "0.0.25"
+  },
+  "devDependencies": {
+        "jasmine-node": "~1",
+        "jshint": "^2.6.0"
   }
 }
