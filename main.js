@@ -25,16 +25,16 @@ if(!argv.platform || !argv.plugin) {
     process.exit(1);
 }
 
-platformId = argv.platform;
-plugins = argv.plugin;
-plugins = Array.isArray(plugins) ? plugins : [plugins];
-
 var onComplete = function(resCode,resObj,logStr) {
-	console.log("result code is : " + resCode + "\n" + JSON.stringify(resObj));
-	console.log(logStr);
+	console.log("result code is : " + resCode);
+	if(resObj) {
+		console.log(JSON.stringify(resObj));
+	}
+	if(logStr) {
+		console.log(logStr);
+	}
 	process.exit(resCode);
-}
+};
 
-
-paramedic.run(platformId, plugins, onComplete, argv.justbuild, argv.port, argv.timeout,true);
+paramedic.run(argv.platform, argv.plugin, onComplete, argv.justbuild, argv.port, argv.timeout,false);
 
