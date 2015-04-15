@@ -45,6 +45,14 @@ ParamedicRunner.prototype = {
             // this would be fatal
             process.exit(cordovaResult.code);
         }
+
+        // limit runtime to TIMEOUT msecs
+        var self = this;
+        setTimeout(function(){
+            self.logMessage("This test seems to be blocked :: timeout exceeded. Exiting ...");
+            self.cleanUpAndExitWithCode(1);
+        },self.timeout);
+
         this.createTempProject();
         this.installPlugins();
         this.startServer();
@@ -228,11 +236,6 @@ ParamedicRunner.prototype = {
             self.logMessage("cordova-paramedic: adding platform");
             shell.exec('cordova platform add ' + self.platformId,{silent:true});
             shell.exec('cordova prepare',{silent:true});
-            // limit runtime to TIMEOUT msecs
-            setTimeout(function(){
-                self.logMessage("This test seems to be blocked :: timeout exceeded. Exiting ...");
-                self.cleanUpAndExitWithCode(1);
-            },self.timeout);
 
             shell.exec('cordova emulate ' + self.platformId.split("@")[0] + " --phone",
                 {async:true,silent:true},
