@@ -14,7 +14,7 @@ var TIMEOUT = 10 * 60 * 1000; // 10 minutes in msec - this will become a param
 
 
 
-function ParamedicRunner(_platformId,_plugins,_callback,bJustBuild,nPort,msTimeout,bSilent) {
+function ParamedicRunner(_platformId,_plugins,_callback,bJustBuild,nPort,msTimeout,browserify,bSilent) {
     this.tunneledUrl = "";
     this.port = nPort;
     this.justBuild = bJustBuild;
@@ -23,6 +23,12 @@ function ParamedicRunner(_platformId,_plugins,_callback,bJustBuild,nPort,msTimeo
     this.callback = _callback;
     this.tempFolder = null;
     this.timeout = msTimeout;
+
+    if(browserify) {
+        this.browserify = "--browserify";
+    } else {
+        this.browserify = '';
+    }
     
     if(bSilent) {
         var logOutput = this.logOutput = [];
@@ -214,7 +220,7 @@ ParamedicRunner.prototype = {
         if(self.justBuild) {
             self.logMessage("cordova-paramedic: adding platform");
             shell.exec('cordova platform add ' + self.platformId,{silent:true});
-            shell.exec('cordova prepare',{silent:true});
+            shell.exec('cordova prepare '+ self.browserify,{silent:true});
             self.logMessage("building ...");
             
             shell.exec('cordova build ' + self.platformId.split("@")[0],
@@ -235,7 +241,7 @@ ParamedicRunner.prototype = {
             self.setConfigStartPage();
             self.logMessage("cordova-paramedic: adding platform");
             shell.exec('cordova platform add ' + self.platformId,{silent:true});
-            shell.exec('cordova prepare',{silent:true});
+            shell.exec('cordova prepare '+ self.browserify,{silent:true});
 
             shell.exec('cordova emulate ' + self.platformId.split("@")[0] + " --phone",
                 {async:true,silent:true},
