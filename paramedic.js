@@ -273,7 +273,7 @@ ParamedicRunner.prototype = {
 };
 
 var storedCWD =  null;
-exports.run = function(_platformId,_plugins,_callback,bJustBuild,nPort,msTimeout,bSilent) {
+exports.run = function(_platformId,_plugins,_callback,bJustBuild,nPort,msTimeout,bBrowserify,bSilent,bVerbose) {
 
     storedCWD = storedCWD || process.cwd();
     if(_platformId && _plugins) {
@@ -288,7 +288,7 @@ exports.run = function(_platformId,_plugins,_callback,bJustBuild,nPort,msTimeout
         };
 
         var runner = new ParamedicRunner(_platformId, plugins, callback, !!bJustBuild,
-                                         nPort || PORT, msTimeout || TIMEOUT, !!bSilent);
+                                         nPort || PORT, msTimeout || TIMEOUT, !!bBrowserify, !!bSilent, !!bVerbose);
         runner.storedCWD = storedCWD;
         return runner.run();
     }
