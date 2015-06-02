@@ -29,7 +29,7 @@ function ParamedicRunner(_platformId,_plugins,_callback,bJustBuild,nPort,msTimeo
     } else {
         this.browserify = '';
     }
-    
+
     if(bSilent) {
         var logOutput = this.logOutput = [];
         this.logMessage = function(msg) {
@@ -133,7 +133,7 @@ ParamedicRunner.prototype = {
         this.logMessage("cordova-paramedic: starting local medic server " + this.platformId);
         var self = this;
         var server = http.createServer(this.requestListener.bind(this));
-        
+
         server.listen(this.port, '127.0.0.1',function onServerConnect() {
 
             switch(self.platformId) {
@@ -185,10 +185,10 @@ ParamedicRunner.prototype = {
                     try {
                         //logMessage("body = " + body);
                         var results = JSON.parse(body);
-                        self.logMessage("Results: ran " + 
-                                        results.mobilespec.specs + 
-                                        " specs with " + 
-                                        results.mobilespec.failures + 
+                        self.logMessage("Results: ran " +
+                                        results.mobilespec.specs +
+                                        " specs with " +
+                                        results.mobilespec.failures +
                                         " failures");
                         if(results.mobilespec.failures > 0) {
                             self.cleanUpAndExitWithCode(1,results);
@@ -196,7 +196,7 @@ ParamedicRunner.prototype = {
                         else {
                             self.cleanUpAndExitWithCode(0,results);
                         }
-                        
+
                     }
                     catch(err) {
                         self.logMessage("parse error :: " + err);
@@ -222,7 +222,7 @@ ParamedicRunner.prototype = {
             shell.exec('cordova platform add ' + self.platformId,{silent:true});
             shell.exec('cordova prepare '+ self.browserify,{silent:true});
             self.logMessage("building ...");
-            
+
             shell.exec('cordova build ' + self.platformId.split("@")[0],
                 {async:true,silent:true},
                 function(code,output){
@@ -280,7 +280,7 @@ exports.run = function(_platformId,_plugins,_callback,bJustBuild,nPort,msTimeout
         // make it an array if it's not
         var plugins = Array.isArray(_plugins) ? _plugins : [_plugins];
 
-        // if we are passed a callback, we will use it, 
+        // if we are passed a callback, we will use it,
         // otherwise just make a quick and dirty one
         var callback = ( _callback && _callback.apply ) ? _callback : function(resCode,resObj) {
             process.exit(resCode);
