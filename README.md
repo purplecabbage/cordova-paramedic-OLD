@@ -13,7 +13,7 @@ To install :
 Usage :
 
 ```
-cordova-paramedic --platform CORDOVA-PLATFORM --plugin PLUGIN-PATH [--justbuild --timeout MSECS --port PORTNUM]
+cordova-paramedic --platform CORDOVA-PLATFORM --plugin PLUGIN-PATH [--justbuild --timeout MSECS --port PORTNUM --verbose]
 
 	`CORDOVA-PLATFORM` : the platform id, currently only supports 'ios'
 	`PLUGIN-PATH` : the relative or absolute path to a plugin folder
@@ -24,6 +24,7 @@ cordova-paramedic --platform CORDOVA-PLATFORM --plugin PLUGIN-PATH [--justbuild 
 			  (defaults to 10 minutes)
 	`PORTNUM` : (optional) port to use for posting results from emulator back to paramedic server
 	--justbuild : (optional) just builds the project, without running the tests
+	--verbose : (optional) verbose mode. Display more information output
 ```
 
 You can also use cordova-paramedic as a module directly :
