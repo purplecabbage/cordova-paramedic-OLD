@@ -138,6 +138,7 @@ ParamedicRunner.prototype = {
 
             switch(self.platformId) {
                 case "ios"     :  // intentional fallthrough
+                case "browser" :
                 case "windows" :
                     self.writeMedicLogUrl("http://127.0.0.1:" + self.port);
                     self.addAndRunPlatform();

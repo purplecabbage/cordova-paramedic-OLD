@@ -15,7 +15,7 @@ Usage :
 ```
 cordova-paramedic --platform CORDOVA-PLATFORM --plugin PLUGIN-PATH [--justbuild --timeout MSECS --port PORTNUM]
 
-	`CORDOVA-PLATFORM` : the platform id, currently only supports 'ios'
+	`CORDOVA-PLATFORM` : the platform id, currently supports `ios|android|windows` and barely `browser`
 	`PLUGIN-PATH` : the relative or absolute path to a plugin folder
 					expected to have a 'tests' folder. 
 					You may specify multiple --plugin flags and they will all 
