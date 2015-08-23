@@ -14,7 +14,7 @@ var TIMEOUT = 10 * 60 * 1000; // 10 minutes in msec - this will become a param
 
 
 
-function ParamedicRunner(_platformId,_plugins,_callback,bJustBuild,nPort,msTimeout,browserify,bSilent) {
+function ParamedicRunner(_platformId,_plugins,_callback,bJustBuild,nPort,msTimeout,browserify,bSilent,bVerbose) {
     this.tunneledUrl = "";
     this.port = nPort;
     this.justBuild = bJustBuild;
@@ -23,13 +23,14 @@ function ParamedicRunner(_platformId,_plugins,_callback,bJustBuild,nPort,msTimeo
     this.callback = _callback;
     this.tempFolder = null;
     this.timeout = msTimeout;
+    this.verbose = bVerbose;
 
     if(browserify) {
         this.browserify = "--browserify";
     } else {
         this.browserify = '';
     }
-    
+
     if(bSilent) {
         var logOutput = this.logOutput = [];
         this.logMessage = function(msg) {
@@ -45,7 +46,7 @@ function ParamedicRunner(_platformId,_plugins,_callback,bJustBuild,nPort,msTimeo
 
 ParamedicRunner.prototype = {
     run: function() {
-        var cordovaResult = shell.exec('cordova --version', {silent:true});
+        var cordovaResult = shell.exec('cordova --version', {silent:!this.verbose});
         if(cordovaResult.code) {
             this.logMessage(cordovaResult.output);
             // this would be fatal
@@ -67,13 +68,13 @@ ParamedicRunner.prototype = {
         this.tempFolder = tmp.dirSync();
         tmp.setGracefulCleanup();
         this.logMessage("cordova-paramedic: creating temp project at " + this.tempFolder.name);
-        shell.exec('cordova create ' + this.tempFolder.name,{silent:true});
+        shell.exec('cordova create ' + this.tempFolder.name,{silent:!this.verbose});
         shell.cd(this.tempFolder.name);
     },
     installSinglePlugin: function(plugin) {
         this.logMessage("cordova-paramedic: installing " + plugin);
         var pluginPath = path.resolve(this.storedCWD, plugin);
-        var plugAddCmd = shell.exec('cordova plugin add ' + pluginPath, {silent:true});
+        var plugAddCmd = shell.exec('cordova plugin add ' + pluginPath, {silent:!this.verbose});
         if(plugAddCmd.code !== 0) {
             this.logMessage('Failed to install plugin : ' + plugin);
             this.cleanUpAndExitWithCode(1);
@@ -91,7 +92,7 @@ ParamedicRunner.prototype = {
         if(!this.justBuild) {
             this.logMessage("cordova-paramedic: installing plugin-test-framework");
             var plugAddCmd = shell.exec('cordova plugin add https://github.com/apache/cordova-plugin-test-framework',
-                                         {silent:true});
+                                         {silent:!this.verbose});
             if(plugAddCmd.code !== 0) {
                 this.logMessage('cordova-plugin-test-framework');
                 this.cleanUpAndExitWithCode(1);
@@ -133,7 +134,7 @@ ParamedicRunner.prototype = {
         this.logMessage("cordova-paramedic: starting local medic server " + this.platformId);
         var self = this;
         var server = http.createServer(this.requestListener.bind(this));
-        
+
         server.listen(this.port, '127.0.0.1',function onServerConnect() {
 
             switch(self.platformId) {
@@ -186,10 +187,10 @@ ParamedicRunner.prototype = {
                     try {
                         //logMessage("body = " + body);
                         var results = JSON.parse(body);
-                        self.logMessage("Results: ran " + 
-                                        results.mobilespec.specs + 
-                                        " specs with " + 
-                                        results.mobilespec.failures + 
+                        self.logMessage("Results: ran " +
+                                        results.mobilespec.specs +
+                                        " specs with " +
+                                        results.mobilespec.failures +
                                         " failures");
                         if(results.mobilespec.failures > 0) {
                             self.cleanUpAndExitWithCode(1,results);
@@ -197,7 +198,7 @@ ParamedicRunner.prototype = {
                         else {
                             self.cleanUpAndExitWithCode(0,results);
                         }
-                        
+
                     }
                     catch(err) {
                         self.logMessage("parse error :: " + err);
@@ -220,12 +221,12 @@ ParamedicRunner.prototype = {
         var self = this;
         if(self.justBuild) {
             self.logMessage("cordova-paramedic: adding platform");
-            shell.exec('cordova platform add ' + self.platformId,{silent:true});
-            shell.exec('cordova prepare '+ self.browserify,{silent:true});
+            shell.exec('cordova platform add ' + self.platformId,{silent:!this.verbose});
+            shell.exec('cordova prepare '+ self.browserify,{silent:!this.verbose});
             self.logMessage("building ...");
-            
+
             shell.exec('cordova build ' + self.platformId.split("@")[0],
-                {async:true,silent:true},
+                {async:true,silent:!this.verbose},
                 function(code,output){
                     if(code !== 0) {
                         self.logMessage("Error: cordova build returned error code " + code);
@@ -241,11 +242,11 @@ ParamedicRunner.prototype = {
         else {
             self.setConfigStartPage();
             self.logMessage("cordova-paramedic: adding platform");
-            shell.exec('cordova platform add ' + self.platformId,{silent:true});
-            shell.exec('cordova prepare '+ self.browserify,{silent:true});
+            shell.exec('cordova platform add ' + self.platformId,{silent:!this.verbose});
+            shell.exec('cordova prepare '+ self.browserify,{silent:!this.verbose});
 
             shell.exec('cordova emulate ' + self.platformId.split("@")[0] + " --phone",
-                {async:true,silent:true},
+                {async:true,silent:!this.verbose},
                 function(code,output){
                     if(code !== 0) {
                         self.logMessage("Error: cordova emulate return error code " + code);
@@ -273,7 +274,7 @@ ParamedicRunner.prototype = {
 };
 
 var storedCWD =  null;
-exports.run = function(_platformId,_plugins,_callback,bJustBuild,nPort,msTimeout,bSilent) {
+exports.run = function(_platformId,_plugins,_callback,bJustBuild,nPort,msTimeout,bBrowserify,bSilent,bVerbose) {
 
     storedCWD = storedCWD || process.cwd();
     if(_platformId && _plugins) {
@@ -281,14 +282,14 @@ exports.run = function(_platformId,_plugins,_callback,bJustBuild,nPort,msTimeout
         // make it an array if it's not
         var plugins = Array.isArray(_plugins) ? _plugins : [_plugins];
 
-        // if we are passed a callback, we will use it, 
+        // if we are passed a callback, we will use it,
         // otherwise just make a quick and dirty one
         var callback = ( _callback && _callback.apply ) ? _callback : function(resCode,resObj) {
             process.exit(resCode);
         };
 
         var runner = new ParamedicRunner(_platformId, plugins, callback, !!bJustBuild,
-                                         nPort || PORT, msTimeout || TIMEOUT, !!bSilent);
+                                         nPort || PORT, msTimeout || TIMEOUT, !!bBrowserify, !!bSilent, !!bVerbose);
         runner.storedCWD = storedCWD;
         return runner.run();
     }
