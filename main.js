@@ -22,7 +22,7 @@ var USAGE = "Error missing args. \n" +
 
 var argv = parseArgs(process.argv.slice(2));
 
-if(!argv.platform || !argv.plugin) {
+if(!argv.platform) {
     console.log(USAGE);
     process.exit(1);
 }

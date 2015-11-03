@@ -278,6 +278,9 @@ var storedCWD =  null;
 exports.run = function(_platformId,_plugins,_callback,bJustBuild,nPort,msTimeout,bBrowserify,bSilent,bVerbose) {
 
     storedCWD = storedCWD || process.cwd();
+    if(!_plugins) {
+        _plugins = process.cwd();
+    }
     if(_platformId && _plugins) {
 
         // make it an array if it's not
