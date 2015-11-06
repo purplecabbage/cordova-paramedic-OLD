@@ -7,7 +7,7 @@ var plugins,
     platformId;
 
 var USAGE = "Error missing args. \n" +
-	"cordova-paramedic --platform PLATFORM --plugin PATH [--justbuild --timeout MSECS --port PORTNUM --browserify]" +
+	"cordova-paramedic --platform PLATFORM --plugin PATH [--justbuild --timeout MSECS --port PORTNUM --browserify]\n" +
 	"`PLATFORM` : the platform id, currently only supports 'ios'\n" +
 	"`PATH` : the relative or absolute path to a plugin folder\n" +
 					"\texpected to have a 'tests' folder.\n" +  
