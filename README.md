@@ -18,11 +18,12 @@ cordova-paramedic --platform PLATFORM --plugin PATH [--justbuild --timeout MSECS
 	expected to have a 'tests' folder.
 	You may specify multiple --plugin flags and they will all
 	be installed and tested together.
-`MSECS` : (optional) time in millisecs to wait for tests to pass|fail 
-	(defaults to 10 minutes) 
+`MSECS` : (optional) time in millisecs to wait for tests to pass|fail
+	(defaults to 10 minutes)
 `PORTNUM` : (optional) port to use for posting results from emulator back to paramedic server
---justbuild : (optional) just builds the project, without running the tests 
---browserify : (optional) plugins are browserified into cordova.js 
+--justbuild : (optional) just builds the project, without running the tests
+--device : (optional) run on device
+--browserify : (optional) plugins are browserified into cordova.js
 --verbose : (optional) verbose mode. Display more information output
 
 ```
@@ -31,7 +32,7 @@ You can also use cordova-paramedic as a module directly :
 
 ```
   var paramedic = require('cordova-paramedic');
-  paramedic.run('ios', '../cordova-plugin-device', onCompleteCallback,justBuild,portNum,msTimeout, useBrowserify, beSilent, beVerbose);
+  paramedic.run('ios', '../cordova-plugin-device', onCompleteCallback,justBuild,portNum,msTimeout, useBrowserify, useDevice, beSilent, beVerbose);
 ```
 
 

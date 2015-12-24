@@ -14,7 +14,7 @@ var TIMEOUT = 10 * 60 * 1000; // 10 minutes in msec - this will become a param
 
 
 
-function ParamedicRunner(_platformId,_plugins,_callback,bJustBuild,nPort,msTimeout,browserify,bSilent,bVerbose,platformPath) {
+function ParamedicRunner(_platformId,_plugins,_callback,bJustBuild,nPort,msTimeout,browserify,runDevice,bSilent,bVerbose,platformPath) {
     this.tunneledUrl = "";
     this.port = nPort;
     this.justBuild = bJustBuild;
@@ -25,13 +25,14 @@ function ParamedicRunner(_platformId,_plugins,_callback,bJustBuild,nPort,msTimeo
     this.timeout = msTimeout;
     this.verbose = bVerbose;
     this.platformPath = platformPath;
+    this.runDevice = runDevice;
 
     if(browserify) {
         this.browserify = "--browserify";
     } else {
         this.browserify = '';
     }
-    
+
     if(bSilent) {
         var logOutput = this.logOutput = [];
         this.logMessage = function(msg) {
@@ -135,7 +136,7 @@ ParamedicRunner.prototype = {
         this.logMessage("cordova-paramedic: starting local medic server " + this.platformId);
         var self = this;
         var server = http.createServer(this.requestListener.bind(this));
-        
+
         server.listen(this.port, '127.0.0.1',function onServerConnect() {
 
             switch(self.platformId) {
@@ -188,10 +189,10 @@ ParamedicRunner.prototype = {
                     try {
                         //logMessage("body = " + body);
                         var results = JSON.parse(body);
-                        self.logMessage("Results: ran " + 
-                                        results.mobilespec.specs + 
-                                        " specs with " + 
-                                        results.mobilespec.failures + 
+                        self.logMessage("Results: ran " +
+                                        results.mobilespec.specs +
+                                        " specs with " +
+                                        results.mobilespec.failures +
                                         " failures");
                         if(results.mobilespec.failures > 0) {
                             self.cleanUpAndExitWithCode(1,results);
@@ -199,7 +200,7 @@ ParamedicRunner.prototype = {
                         else {
                             self.cleanUpAndExitWithCode(0,results);
                         }
-                        
+
                     }
                     catch(err) {
                         self.logMessage("parse error :: " + err);
@@ -225,12 +226,12 @@ ParamedicRunner.prototype = {
         this.logMessage("cordova-paramedic: adding platform : " + plat);
 
         shell.exec('cordova platform add ' + plat,{silent:!this.verbose});
-        shell.exec('cordova prepare '+ this.browserify,{silent:!this.verbose});   
+        shell.exec('cordova prepare '+ this.browserify,{silent:!this.verbose});
 
         if(this.justBuild) {
 
             this.logMessage("building ...");
-            
+
             shell.exec('cordova build ' + this.platformId.split("@")[0],
                 {async:true,silent:!this.verbose},
                 function(code,output){
@@ -247,17 +248,29 @@ ParamedicRunner.prototype = {
         }
         else {
             this.setConfigStartPage();
-
-            shell.exec('cordova emulate ' + this.platformId.split("@")[0] + " --phone",
-                {async:true,silent:!this.verbose},
-                function(code,output){
-                    if(code !== 0) {
-                        self.logMessage("Error: cordova emulate return error code " + code);
-                        self.logMessage("output: " + output);
-                        self.cleanUpAndExitWithCode(1);
+            if(this.runDevice) {
+                shell.exec('cordova run ' + this.platformId.split("@")[0],
+                    {async:true,silent:!this.verbose},
+                    function(code,output){
+                        if(code !== 0) {
+                            self.logMessage("Error: cordova emulate return error code " + code);
+                            self.logMessage("output: " + output);
+                            self.cleanUpAndExitWithCode(1);
+                        }
                     }
-                }
-            );
+                );
+            } else {
+                shell.exec('cordova emulate ' + this.platformId.split("@")[0] + " --phone",
+                    {async:true,silent:!this.verbose},
+                    function(code,output){
+                        if(code !== 0) {
+                            self.logMessage("Error: cordova emulate return error code " + code);
+                            self.logMessage("output: " + output);
+                            self.cleanUpAndExitWithCode(1);
+                        }
+                    }
+                );
+            }
         }
     },
     tunnelCallback: function(err, tunnel) {
@@ -289,7 +302,7 @@ exports.run = function(_platformId,_plugins,_callback,bJustBuild,nPort,msTimeout
         // make it an array if it's not
         var plugins = Array.isArray(_plugins) ? _plugins : [_plugins];
 
-        // if we are passed a callback, we will use it, 
+        // if we are passed a callback, we will use it,
         // otherwise just make a quick and dirty one
         var callback = ( _callback && _callback.apply ) ? _callback : function(resCode,resObj) {
             process.exit(resCode);
