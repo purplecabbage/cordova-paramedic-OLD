@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/purplecabbage/cordova-paramedic.git"
+    "url": "git://github.com/apache/cordova-paramedic.git"
   },
   "scripts": {
     "test":"npm run jshint & npm run test-ios",
