@@ -139,12 +139,7 @@ ParamedicRunner.prototype = {
         server.listen(this.port, '127.0.0.1',function onServerConnect() {
 
             switch(self.platformId) {
-                case "ios"     :  // intentional fallthrough
-                case "browser" :
-                case "windows" :
-                    self.writeMedicLogUrl("http://127.0.0.1:" + self.port);
-                    self.addAndRunPlatform();
-                    break;
+
                 case "android" :
                     self.writeMedicLogUrl("http://10.0.2.2:" + self.port);
                     self.addAndRunPlatform();
@@ -165,9 +160,12 @@ ParamedicRunner.prototype = {
                         }
                     });
                     break;
+                case "ios"     :  // intentional fallthrough
+                case "browser" :
+                case "windows" :
                 default :
-                    self.logMessage("platform is not supported :: " + self.platformId);
-                    self.cleanUpAndExitWithCode(1);
+                    self.writeMedicLogUrl("http://127.0.0.1:" + self.port);
+                    self.addAndRunPlatform();
                     break;
             }
         });
